@@ -1,0 +1,31 @@
+.schedule-main {
+  padding: 3px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.days-grid-main {
+  text-align: center;
+  max-height: 300px;
+  /* width: 50%; */
+}
+
+.days-grid-elements {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.session-time {
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+    gap: 10px;
+}
+.common-session{
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+
+}
