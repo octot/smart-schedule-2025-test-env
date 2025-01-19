@@ -38,7 +38,7 @@ function calculateNextTriggerTime(day, time) {
   const dayIndex = daysOfWeek.indexOf(day.toLowerCase());
   const [hours, minutes] = time.split(":").map(Number);
   //   const now = new Date();
-  const now = new Date("2025-01-11T19:45:00"); // Setting today's date and time for testing
+  const now = new Date(); // Setting today's date and time for testing
   const nextDate = new Date(now);
   nextDate.setHours(hours, minutes, 0, 0);
   // nextDate.setDate(now.getDate() + ((7 + dayIndex - now.getDay()) % 7 || 7));

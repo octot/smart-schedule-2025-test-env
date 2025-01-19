@@ -39,8 +39,8 @@ const sessionReducer = (state, action) => {
       } else {
         newSelectedDays[day] = true;
       }
-      console.log("newSelectedDays", newSessionTimes);
-      console.log("newSessionTimes", newSelectedDays);
+      
+      
       return {
         ...state,
         selectedDays: newSelectedDays,
@@ -53,7 +53,7 @@ const sessionReducer = (state, action) => {
         ...state.sessionTimes,
         [timeDay]: { ...state.sessionTimes[timeDay], [field]: value },
       };
-      // console.log("updatedTimestimeDay", updatedTimes);
+      // 
       let newErrors = { ...state.errors };
       const startTime = updatedTimes[timeDay].sessionStartTime;
       const endTime = updatedTimes[timeDay].sessionEndTime;
@@ -68,7 +68,7 @@ const sessionReducer = (state, action) => {
         errors: newErrors,
       };
     case "SAVE_DAYS":
-      console.log("SAVE_DAYS:");
+      
       const result = Object.keys(state.selectedDays).map((d) => ({
         day: d,
         sessionStartTime: state.useCommonSession
@@ -127,7 +127,7 @@ const sessionReducer = (state, action) => {
         ...state.commonSession,
         [action.payload.field]: action.payload.value,
       };
-      console.log("UPDATE_COMMON_SESSION", updatedCommonSession);
+      
       let commonSessionErrors = { ...state.errors };
       if (
         action.payload.field === "sessionEndTime" &&
@@ -169,7 +169,7 @@ export const SessionProvider = ({ children }) => {
     setEditUser((prevUsers) => {
       if (!Array.isArray(prevUsers)) return [updatedUser];
       const userExists = prevUsers.some((user) => user.id === updatedUser.id);
-      console.log("userExists", userExists);
+      
       if (userExists) {
         return prevUsers.map((user) =>
           user.id === updatedUser.id ? { ...user, ...updatedUser } : user

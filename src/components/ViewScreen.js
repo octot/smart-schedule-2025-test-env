@@ -35,8 +35,8 @@ const ViewScreen = () => {
       setError("Failed to delete schedule");
     }
   };
-
   const handleViaWhatsappDetails = (scheduleItem) => {
+    console.log("scheduleItem", scheduleItem);  
     const today = new Date()
       .toLocaleString("en-US", { weekday: "short" })
       .toLowerCase();

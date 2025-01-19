@@ -66,11 +66,17 @@ const CreateNewScreen = () => {
   }, [editUser, dispatch]);
 
   const toggleDaySelection = (day) => {
+    console.log("toggleDaySelectioneditUserstate", state.selectedDays, state.sessionTimes);
     dispatch({ type: "TOGGLE_DAY", payload: day });
   };
   const handleSessionChange = (day, field, value) => {
+    console.log("handleSessionChangeeditUserstate", state.selectedDays, state.sessionTimes);
+
     console.log("handleSessionChangeday", day, "field", field, "value", value);
+    /*
     if (editUser) {
+
+      console.log("editUserstate", state.selectedDays, state.sessionTimes);
       const existingDayIndex = editUser?.totalDays?.findIndex(
         (item) => item.day === day
       );
@@ -78,7 +84,7 @@ const CreateNewScreen = () => {
       let updatedDay;
       if (existingDayIndex !== -1) {
         updatedDay = {
-          ...editUser.totalDays[existingDayIndex],
+          ...editUser?.totalDays[existingDayIndex],
           [field]: value,
         };
       } else {
@@ -88,18 +94,16 @@ const CreateNewScreen = () => {
           sessionEndTime: field === "sessionEndTime" ? value : "",
         };
       }
+
       const updatedTotalDays =
-        existingDayIndex !== -1
-          ? editUser.totalDays.map((item, index) =>
-              index === existingDayIndex ? updatedDay : item
-            )
-          : [...editUser.totalDays, updatedDay];
+        existingDayIndex !== -1 ? editUser.totalDays.map((item, index) => index === existingDayIndex ? updatedDay : item): [...editUser.totalDays, updatedDay];
       console.log("updatedTotalDays", updatedTotalDays);
       setEditUser((prev) => ({
         ...prev,
         totalDays: updatedTotalDays,
       }));
     }
+      */
     dispatch({
       type: "UPDATE_SESSION_TIME",
       payload: { day, field, value },
@@ -109,56 +113,62 @@ const CreateNewScreen = () => {
   const handleSave = () => {
     if (editUser) {
       setEditUser((prev) => {
-        // console.log("editUserstate", state.selectedDays, state.sessionTimes);
+        console.log("handleSaveeditUserstate", state.selectedDays, state.sessionTimes);
+        console.log("prev.useCommonSession", prev.useCommonSession);
         if (prev.useCommonSession) {
           return {
             ...prev,
             totalDays: [
               {
-                day: "sun",
-                sessionStartTime: prev.commonSession?.sessionStartTime,
-                sessionEndTime: prev.commonSession?.sessionEndTime,
+          day: "sun",
+          sessionStartTime: prev.commonSession?.sessionStartTime,
+          sessionEndTime: prev.commonSession?.sessionEndTime,
               },
               {
-                day: "mon",
-                sessionStartTime: prev.commonSession?.sessionStartTime,
-                sessionEndTime: prev.commonSession?.sessionEndTime,
+          day: "mon",
+          sessionStartTime: prev.commonSession?.sessionStartTime,
+          sessionEndTime: prev.commonSession?.sessionEndTime,
               },
               {
-                day: "tue",
-                sessionStartTime: prev.commonSession?.sessionStartTime,
-                sessionEndTime: prev.commonSession?.sessionEndTime,
+          day: "tue",
+          sessionStartTime: prev.commonSession?.sessionStartTime,
+          sessionEndTime: prev.commonSession?.sessionEndTime,
               },
               {
-                day: "wed",
-                sessionStartTime: prev.commonSession?.sessionStartTime,
-                sessionEndTime: prev.commonSession?.sessionEndTime,
+          day: "wed",
+          sessionStartTime: prev.commonSession?.sessionStartTime,
+          sessionEndTime: prev.commonSession?.sessionEndTime,
               },
               {
-                day: "thu",
-                sessionStartTime: prev.commonSession?.sessionStartTime,
-                sessionEndTime: prev.commonSession?.sessionEndTime,
+          day: "thu",
+          sessionStartTime: prev.commonSession?.sessionStartTime,
+          sessionEndTime: prev.commonSession?.sessionEndTime,
               },
               {
-                day: "fri",
-                sessionStartTime: prev.commonSession?.sessionStartTime,
-                sessionEndTime: prev.commonSession?.sessionEndTime,
+          day: "fri",
+          sessionStartTime: prev.commonSession?.sessionStartTime,
+          sessionEndTime: prev.commonSession?.sessionEndTime,
               },
               {
-                day: "sat",
-                sessionStartTime: prev.commonSession?.sessionStartTime,
-                sessionEndTime: prev.commonSession?.sessionEndTime,
+          day: "sat",
+          sessionStartTime: prev.commonSession?.sessionStartTime,
+          sessionEndTime: prev.commonSession?.sessionEndTime,
               },
             ],
           };
         } else {
-          const filteredTotalDays = prev.totalDays.filter(
-            (dayObj) => state.selectedDays[dayObj.day]
-          );
-          console.log("filteredTotalDays", filteredTotalDays);
+          console.log("prev.totalDays", prev.totalDays);
+            const updatedTotalDays = Object.keys(state.selectedDays)
+            .filter((day) => state.selectedDays[day])
+            .map((day) => ({
+              day,
+              sessionStartTime: state.sessionTimes[day]?.sessionStartTime || "",
+              sessionEndTime: state.sessionTimes[day]?.sessionEndTime || "",
+            }));
+          console.log("updatedTotalDays", updatedTotalDays);
           return {
             ...prev,
-            totalDays: filteredTotalDays,
+            totalDays: updatedTotalDays,
           };
         }
       });
@@ -236,7 +246,6 @@ const CreateNewScreen = () => {
           : null,
       }));
     }
-
     dispatch({
       type: "TOGGLE_COMMON_SESSION",
       payload: { checked, selectedDaysTrue },
@@ -260,7 +269,6 @@ const CreateNewScreen = () => {
   };
   const handleOpen = () => dispatch({ type: "TOGGLE_MODAL", payload: true });
   const handleClose = () => dispatch({ type: "TOGGLE_MODAL", payload: false });
-
   return (
     <div>
       <Box className="schedule-main">
