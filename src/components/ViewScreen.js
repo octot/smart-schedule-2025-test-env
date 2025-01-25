@@ -7,6 +7,8 @@ import {
 } from "./contextAPI/sessionManagementContext";
 import { useNavigate } from "react-router-dom";
 import {
+  TextField,
+  Box,
   Dialog,
   DialogActions,
   DialogContent,
@@ -23,56 +25,10 @@ const ViewScreen = () => {
   const handleOpenDialogForWhatsapp = () => setOpenDialogForWhatsapp(true);
   const handleCloseDialogForWhatsapp = () => setOpenDialogForWhatsapp(false);
   const navigate = useNavigate();
-  const handleEdit = (_id) => {
-    navigate(`/create/${_id}`);
-  };
-  const handleDeleteSchedule = async (id) => {
-    try {
-      await axios.delete(`/api/schedules/${id}`);
-      setSchedules(schedules.filter((schedule) => schedule._id !== id));
-    } catch (err) {
-      console.error(err);
-      setError("Failed to delete schedule");
-    }
-  };
-  const handleViaWhatsappDetails = (scheduleItem) => {
-    console.log("scheduleItem", scheduleItem);  
-    const today = new Date()
-      .toLocaleString("en-US", { weekday: "short" })
-      .toLowerCase();
-    console.log("today", today);
-    const matchingDay = scheduleItem.totalDays.find((day) => day.day === today);
-    if (matchingDay) {
-      sendViaWhatsapp(scheduleItem, today);
-    } else {
-      setOpenDialogForWhatsapp(true);
-      alert("No matching schedule for today");
-    }
-  };
-
-  const sendViaWhatsapp = async (scheduleItem, today) => {
-    const todaySchedule = scheduleItem?.totalDays.find(
-      (item) => item.day === today
-    );
-    const sessionStartTime = todaySchedule?.sessionStartTime;
-    console.log("sendViaWhatsappsessionStartTime", sessionStartTime);
-    const sessionEndTime = todaySchedule?.sessionEndTime;
-    const message = `
-    Greetings from Smartpoint 😇
-    Today your class is scheduled for
-    Tuition ID : ${scheduleItem.tuitionId}
-    Session Date : ${scheduleItem.sessionDate}
-    Tutor Name : ${scheduleItem.tutorName}
-    Time of Session: ${sessionStartTime} - ${sessionEndTime}`;
-
-    try {
-      await axios.post("/api/schedules/send-whatsapp", { message });
-      alert("Message sent via WhatsApp");
-    } catch (err) {
-      console.error(err);
-      setError("Failed to send message via WhatsApp");
-    }
-  };
+  const [sessionTimes, setSessionTimes] = useState({
+    sessionStartTime: "",
+    sessionEndTime: "",
+  });
   useEffect(() => {
     const fetchSchedules = async () => {
       try {
@@ -87,8 +43,70 @@ const ViewScreen = () => {
     };
     fetchSchedules();
   }, []);
+  const handleEdit = (_id) => {
+    navigate(`/create/${_id}`);
+  };
+  const handleDeleteSchedule = async (id) => {
+    try {
+      await axios.delete(`/api/schedules/${id}`);
+      setSchedules(schedules.filter((schedule) => schedule._id !== id));
+    } catch (err) {
+      console.error(err);
+      setError("Failed to delete schedule");
+    }
+  };
+  const handleViaWhatsappDetails = (scheduleItem) => {
+    console.log("scheduleItem", scheduleItem);
+    const today = new Date()
+      .toLocaleString("en-US", { weekday: "short" })
+      .toLowerCase();
+    const matchingDay = scheduleItem.totalDays.find((day) => day.day === today);
+    if (matchingDay) {
+      sendViaWhatsapp(scheduleItem, today);
+    } else {
+      setOpenDialogForWhatsapp(true);
+      sendViaWhatsapp(scheduleItem, today);
+
+      // sendViaWhatsapp(updatedScheduleItem, today);
+    }
+  };
+  console.log("sessionTimes", sessionTimes);
+  const sendViaWhatsapp = async (scheduleItem, today) => {
+    const todaySchedule = scheduleItem?.totalDays.find(
+      (item) => item.day === today
+    );
+    let sessionStartTime = todaySchedule?.sessionStartTime;
+    let sessionEndTime = todaySchedule?.sessionEndTime;
+    if (sessionTimes.sessionStartTime && sessionTimes.sessionEndTime) {
+      sessionStartTime = sessionTimes.sessionStartTime;
+      sessionEndTime = sessionTimes.sessionEndTime;
+    }
+    if (sessionStartTime && sessionEndTime) {
+      const message = `Greetings from Smartpoint 😇
+    Today your class is scheduled for
+    Tuition ID : ${scheduleItem.tuitionId}
+    Session Date : ${scheduleItem.sessionDate}
+    Tutor Name : ${scheduleItem.tutorName}
+    Time of Session: ${sessionStartTime} - ${sessionEndTime}`;
+      try {
+        await axios.post("/api/schedules/send-whatsapp", { message });
+        setSessionTimes({ sessionStartTime: "", sessionEndTime: "" });
+        alert("Message sent via WhatsApp");
+      } catch (err) {
+        console.error(err);
+        setError("Failed to send message via WhatsApp");
+      }
+    }
+  };
+
+  const handleSessionForTodaysInterval = (field, value) => {
+    setSessionTimes((prevTimes) => ({
+      ...prevTimes,
+      [field]: value,
+    }));
+  };
   return (
-    <div>
+    <div style={{ height: "100vh", overflow: "auto" }}>
       <h1>Schedule Details</h1>
       {loading ? (
         <p>Loading...</p>
@@ -135,44 +153,93 @@ const ViewScreen = () => {
                     Send via WhatsApp
                   </Button>
                 </td>
+                <div>
+                  {openDialogForWhatsapp && (
+                    <div>
+                      <Dialog
+                        open={openDialogForWhatsapp}
+                        onClose={handleCloseDialogForWhatsapp}
+                        aria-labelledby="dialog-title"
+                        aria-describedby="dialog-description"
+                        maxWidth="sm"
+                        fullWidth
+                        PaperProps={{ style: { height: "30vh" } }}
+                      >
+                        <DialogTitle id="dialog-title">
+                          Date not found for today. Please provide the session
+                        </DialogTitle>
+                        <DialogContent>
+                          <DialogContentText
+                            id="dialog-description"
+                            style={{
+                              display: "flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              height: "100%",
+                            }}
+                          >
+                            <div>
+                              <Box component="div" className="session-time">
+                                <label>
+                                  <TextField
+                                    required
+                                    label="Start Time"
+                                    type="time"
+                                    value={sessionTimes.sessionStartTime}
+                                    onChange={(e) =>
+                                      handleSessionForTodaysInterval(
+                                        "sessionStartTime",
+                                        e.target.value
+                                      )
+                                    }
+                                    InputLabelProps={{
+                                      shrink: true,
+                                    }}
+                                  />
+                                </label>
+                                <label>
+                                  <TextField
+                                    required
+                                    label="End Time"
+                                    type="time"
+                                    value={sessionTimes.sessionEndTime}
+                                    onChange={(e) =>
+                                      handleSessionForTodaysInterval(
+                                        "sessionEndTime",
+                                        e.target.value
+                                      )
+                                    }
+                                    InputLabelProps={{
+                                      shrink: true,
+                                    }}
+                                  />
+                                </label>
+                              </Box>
+                            </div>
+                          </DialogContentText>
+                        </DialogContent>
+                        <DialogActions>
+                          <Button
+                            onClick={handleCloseDialogForWhatsapp}
+                            color="primary"
+                          >
+                            Close
+                          </Button>
+                          <Button
+                            onClick={() => handleViaWhatsappDetails(schedule)}
+                            color="primary"
+                            autoFocus
+                          >
+                            SendMessage
+                          </Button>
+                        </DialogActions>
+                      </Dialog>
+                    </div>
+                  )}
+                </div>
               </tr>
             ))}
           </tbody>
-          <div>
-            {openDialogForWhatsapp && (
-              <div>
-              
-                <Dialog
-                  open={openDialogForWhatsapp}
-                  onClose={handleCloseDialogForWhatsapp}
-                  aria-labelledby="dialog-title"
-                  aria-describedby="dialog-description"
-                >
-                  <DialogTitle id="dialog-title">Dialog Title</DialogTitle>
-                  <DialogContent>
-                    <DialogContentText id="dialog-description">
-                      This is a simple dialog example using Material-UI.
-                    </DialogContentText>
-                  </DialogContent>
-                  <DialogActions>
-                    <Button
-                      onClick={handleCloseDialogForWhatsapp}
-                      color="primary"
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={handleCloseDialogForWhatsapp}
-                      color="primary"
-                      autoFocus
-                    >
-                      Confirm
-                    </Button>
-                  </DialogActions>
-                </Dialog>
-              </div>
-            )}
-          </div>
         </table>
       )}
     </div>

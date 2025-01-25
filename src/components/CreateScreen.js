@@ -66,44 +66,14 @@ const CreateNewScreen = () => {
   }, [editUser, dispatch]);
 
   const toggleDaySelection = (day) => {
-    console.log("toggleDaySelectioneditUserstate", state.selectedDays, state.sessionTimes);
+    console.log(
+      "toggleDaySelectioneditUserstate",
+      state.selectedDays,
+      state.sessionTimes
+    );
     dispatch({ type: "TOGGLE_DAY", payload: day });
   };
   const handleSessionChange = (day, field, value) => {
-    console.log("handleSessionChangeeditUserstate", state.selectedDays, state.sessionTimes);
-
-    console.log("handleSessionChangeday", day, "field", field, "value", value);
-    /*
-    if (editUser) {
-
-      console.log("editUserstate", state.selectedDays, state.sessionTimes);
-      const existingDayIndex = editUser?.totalDays?.findIndex(
-        (item) => item.day === day
-      );
-      console.log("existingDayIndex", existingDayIndex);
-      let updatedDay;
-      if (existingDayIndex !== -1) {
-        updatedDay = {
-          ...editUser?.totalDays[existingDayIndex],
-          [field]: value,
-        };
-      } else {
-        updatedDay = {
-          day,
-          sessionStartTime: field === "sessionStartTime" ? value : "",
-          sessionEndTime: field === "sessionEndTime" ? value : "",
-        };
-      }
-
-      const updatedTotalDays =
-        existingDayIndex !== -1 ? editUser.totalDays.map((item, index) => index === existingDayIndex ? updatedDay : item): [...editUser.totalDays, updatedDay];
-      console.log("updatedTotalDays", updatedTotalDays);
-      setEditUser((prev) => ({
-        ...prev,
-        totalDays: updatedTotalDays,
-      }));
-    }
-      */
     dispatch({
       type: "UPDATE_SESSION_TIME",
       payload: { day, field, value },
@@ -113,52 +83,56 @@ const CreateNewScreen = () => {
   const handleSave = () => {
     if (editUser) {
       setEditUser((prev) => {
-        console.log("handleSaveeditUserstate", state.selectedDays, state.sessionTimes);
+        console.log(
+          "handleSaveeditUserstate",
+          state.selectedDays,
+          state.sessionTimes
+        );
         console.log("prev.useCommonSession", prev.useCommonSession);
         if (prev.useCommonSession) {
           return {
             ...prev,
             totalDays: [
               {
-          day: "sun",
-          sessionStartTime: prev.commonSession?.sessionStartTime,
-          sessionEndTime: prev.commonSession?.sessionEndTime,
+                day: "sun",
+                sessionStartTime: prev.commonSession?.sessionStartTime,
+                sessionEndTime: prev.commonSession?.sessionEndTime,
               },
               {
-          day: "mon",
-          sessionStartTime: prev.commonSession?.sessionStartTime,
-          sessionEndTime: prev.commonSession?.sessionEndTime,
+                day: "mon",
+                sessionStartTime: prev.commonSession?.sessionStartTime,
+                sessionEndTime: prev.commonSession?.sessionEndTime,
               },
               {
-          day: "tue",
-          sessionStartTime: prev.commonSession?.sessionStartTime,
-          sessionEndTime: prev.commonSession?.sessionEndTime,
+                day: "tue",
+                sessionStartTime: prev.commonSession?.sessionStartTime,
+                sessionEndTime: prev.commonSession?.sessionEndTime,
               },
               {
-          day: "wed",
-          sessionStartTime: prev.commonSession?.sessionStartTime,
-          sessionEndTime: prev.commonSession?.sessionEndTime,
+                day: "wed",
+                sessionStartTime: prev.commonSession?.sessionStartTime,
+                sessionEndTime: prev.commonSession?.sessionEndTime,
               },
               {
-          day: "thu",
-          sessionStartTime: prev.commonSession?.sessionStartTime,
-          sessionEndTime: prev.commonSession?.sessionEndTime,
+                day: "thu",
+                sessionStartTime: prev.commonSession?.sessionStartTime,
+                sessionEndTime: prev.commonSession?.sessionEndTime,
               },
               {
-          day: "fri",
-          sessionStartTime: prev.commonSession?.sessionStartTime,
-          sessionEndTime: prev.commonSession?.sessionEndTime,
+                day: "fri",
+                sessionStartTime: prev.commonSession?.sessionStartTime,
+                sessionEndTime: prev.commonSession?.sessionEndTime,
               },
               {
-          day: "sat",
-          sessionStartTime: prev.commonSession?.sessionStartTime,
-          sessionEndTime: prev.commonSession?.sessionEndTime,
+                day: "sat",
+                sessionStartTime: prev.commonSession?.sessionStartTime,
+                sessionEndTime: prev.commonSession?.sessionEndTime,
               },
             ],
           };
         } else {
           console.log("prev.totalDays", prev.totalDays);
-            const updatedTotalDays = Object.keys(state.selectedDays)
+          const updatedTotalDays = Object.keys(state.selectedDays)
             .filter((day) => state.selectedDays[day])
             .map((day) => ({
               day,
