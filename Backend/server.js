@@ -4,14 +4,12 @@ const app = express();
 const port = 5000;
 const cors = require("cors");
 const routes = require("./routes/sessionsScheduleRoutes");
-const scheduleMessages = require("./schedule/scheduleManager");
-
-// Middleware
+const { scheduleMessages } = require("./schedule/scheduleManager");
 app.use(express.json());
 app.use(routes);
 app.use(cors());
 scheduleMessages();
-// Routes
+
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });

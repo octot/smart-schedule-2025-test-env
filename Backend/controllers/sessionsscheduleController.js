@@ -2,10 +2,10 @@ require("dotenv").config();
 const { accountSid, authToken, twilioNumber, to } = require("../config");
 const twilio = require("twilio");
 const Schedule = require("../models/sessionscheduleModel");
+const settingsModel = require("../models/settingsModel");
 const createSchedule = async (req, res) => {
   try {
     const { tuitionId, tutorName, automate, totalDays, sessionDate } = req.body;
-    // Create a new schedule
     const newSchedule = new Schedule({
       tuitionId,
       tutorName,
@@ -13,8 +13,6 @@ const createSchedule = async (req, res) => {
       totalDays,
       sessionDate,
     });
-
-    // Save to the database
     const savedSchedule = await newSchedule.save();
     res.status(201).json(savedSchedule);
   } catch (error) {
@@ -29,7 +27,6 @@ const getAllSchedules = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 const getScheduleById = async (req, res) => {
   try {
     const schedule = await Schedule.findById(req.params.id);
@@ -41,7 +38,6 @@ const getScheduleById = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 const updateSchedule = async (req, res) => {
   try {
     const { tuitionId, tutorName, automate, totalDays, sessionDate } = req.body;
@@ -62,7 +58,6 @@ const updateSchedule = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
-
 const deleteSchedule = async (req, res) => {
   try {
     const deletedSchedule = await Schedule.findByIdAndDelete(req.params.id);
@@ -102,6 +97,30 @@ const sendScheduleViaWhatsApp = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+const getSettings = async (req, res) => {
+  try {
+    const settings = await settingsModel.find();
+    res.status(200).json(settings);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+const updateSettings = async (req, res) => {
+  try {
+    const { scheduleYN, scheduleTimeSet } = req.body;
+    console.log(scheduleYN, scheduleTimeSet);
+    const updatedSettings = await settingsModel.findOneAndUpdate(
+      {},
+      { scheduleYN, scheduleTimeSet },
+      { new: true, runValidators: true, upsert: true } // Return the updated document, create if not exists
+    );
+
+    res.status(200).json(updatedSettings);
+  } catch (error) {
+    console.error (error);
+    res.status(400).json({ error: error.message });
+  }
+};
 
 module.exports = {
   createSchedule,
@@ -110,4 +129,6 @@ module.exports = {
   updateSchedule,
   deleteSchedule,
   sendScheduleViaWhatsApp,
+  getSettings,
+  updateSettings,
 };
