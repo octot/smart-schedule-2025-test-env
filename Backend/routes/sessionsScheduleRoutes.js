@@ -9,9 +9,13 @@ const {
   sendScheduleViaWhatsApp,
   getSettings,
   updateSettings,
+  saveScheduleToDB,
+  getScheduleToDB,
+  updateScheduleToDB
 } = require("../controllers/sessionsScheduleController");
-
-// Create a new schedule
+router.post("/api/schedules/saveScheduleToDB", saveScheduleToDB);
+router.post("/api/schedules/updateScheduleToDB", updateScheduleToDB);
+router.get("/api/getScheduleToDB", getScheduleToDB);
 router.post("/api/schedules", createSchedule);
 router.post("/api/schedules/send-whatsapp", sendScheduleViaWhatsApp);
 router.get("/api/getSettings", getSettings);

@@ -3,6 +3,8 @@ const { accountSid, authToken, twilioNumber, to } = require("../config");
 const twilio = require("twilio");
 const Schedule = require("../models/sessionscheduleModel");
 const settingsModel = require("../models/settingsModel");
+const ScheduleDetailsModel = require("../models/scheduleDetailsModel");
+const moment = require("moment");
 const createSchedule = async (req, res) => {
   try {
     const { tuitionId, tutorName, automate, totalDays, sessionDate } = req.body;
@@ -117,11 +119,97 @@ const updateSettings = async (req, res) => {
 
     res.status(200).json(updatedSettings);
   } catch (error) {
-    console.error (error);
+    console.error(error);
     res.status(400).json({ error: error.message });
   }
 };
+let recordSelected;
+async function saveScheduleToDB(
+  tuitionId,
+  triggerDate,
+  sessionDate,
+  tutorName,
+  sessionStartTime,
+  sessionEndTime
+) {
+  try {
+    const existingEntry = await ScheduleDetailsModel.findOne({
+      tuitionId,
+      triggerDate,
+    });
+    if (existingEntry) {
+      console.log("Entry already exists:", existingEntry);
+    } else {
+      const newSchedule = new ScheduleDetailsModel({
+        tuitionId,
+        triggerDate,
+        sessionDate,
+        tutorName,
+        sessionStartTime,
+        sessionEndTime,
+        recordSelected,
+      });
+      await newSchedule.save();
+      console.log("New schedule saved:", newSchedule);
+    }
+  } catch (error) {
+    console.error("Error saving schedule:", error);
+  }
+}
+const getScheduleToDB = async (req, res) => {
+  try {
+    const schedules = await ScheduleDetailsModel.find();
+    res.status(200).json(schedules);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
+const updateScheduleToDB = async (req, res) => {
+  try {
+    const updates = req.body; // Expecting an array of JSON objects
+    const updatePromises = updates.map(async (update) => {
+      const {
+        tuitionId,
+        triggerDate,
+        sessionDate,
+        tutorName,
+        sessionStartTime,
+        sessionEndTime,
+        recordSelected,
+      } = update;
+      return ScheduleDetailsModel.findOneAndUpdate(
+        { tuitionId, triggerDate },
+        {
+          sessionDate,
+          tutorName,
+          sessionStartTime,
+          sessionEndTime,
+          recordSelected,
+        },
+        { new: true, runValidators: true }
+      );
+    });
+
+    const updatedSchedules = await Promise.all(updatePromises);
+
+    res.status(200).json(updatedSchedules);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+async function cleanupExpiredTriggerTimes() {
+  try {
+    const currentTime = moment().toDate();
+    const result = await ScheduleDetailsModel.deleteMany({
+      triggerDate: { $lt: currentTime },
+    });
+    console.log(`Deleted ${result.deletedCount} expired trigger times.`);
+  } catch (error) {
+    console.error("Error cleaning up expired trigger times:", error);
+  }
+}
+setInterval(cleanupExpiredTriggerTimes, 60 * 100000); // 1 minute interval
 module.exports = {
   createSchedule,
   getAllSchedules,
@@ -131,4 +219,7 @@ module.exports = {
   sendScheduleViaWhatsApp,
   getSettings,
   updateSettings,
+  saveScheduleToDB,
+  getScheduleToDB,
+  updateScheduleToDB,
 };
