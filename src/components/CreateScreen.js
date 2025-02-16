@@ -132,13 +132,28 @@ const CreateNewScreen = () => {
           };
         } else {
           console.log("prev.totalDays", prev.totalDays);
+          console.log("updatedTotalDaysstateselectedDays", state.selectedDays);
           const updatedTotalDays = Object.keys(state.selectedDays)
             .filter((day) => state.selectedDays[day])
-            .map((day) => ({
-              day,
-              sessionStartTime: state.sessionTimes[day]?.sessionStartTime || "",
-              sessionEndTime: state.sessionTimes[day]?.sessionEndTime || "",
-            }));
+            .map((day) => {
+              // Find matching entry in prev.totalDays
+              const prevDayData = prev.totalDays.find((d) => d.day === day);
+              const sessionData = state.sessionTimes[day];
+              return {
+                day,
+                sessionStartTime:
+                  (sessionData?.sessionStartTime ||
+                    prevDayData?.sessionStartTime) ??
+                  "",
+                sessionEndTime:
+                  (sessionData?.sessionEndTime ||
+                    prevDayData?.sessionEndTime) ??
+                  "",
+              };
+            });
+
+          console.log(updatedTotalDays);
+
           console.log("updatedTotalDays", updatedTotalDays);
           return {
             ...prev,
@@ -167,6 +182,7 @@ const CreateNewScreen = () => {
     e.preventDefault();
     try {
       if (editUser) {
+        console.log("editUserhandleSubmit", editUser);
         const response = await fetch(`/api/schedules/${editUser._id}`, {
           method: "PUT",
           headers: {

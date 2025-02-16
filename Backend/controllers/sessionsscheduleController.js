@@ -209,7 +209,7 @@ async function cleanupExpiredTriggerTimes() {
     console.error("Error cleaning up expired trigger times:", error);
   }
 }
-setInterval(cleanupExpiredTriggerTimes, 60 * 100000); // 1 minute interval
+setInterval(cleanupExpiredTriggerTimes, 60 * 100000);
 module.exports = {
   createSchedule,
   getAllSchedules,

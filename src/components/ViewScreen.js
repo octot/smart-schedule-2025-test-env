@@ -106,7 +106,7 @@ const ViewScreen = () => {
     }));
   };
   return (
-    <div style={{ height: "100vh", overflow: "auto" }}>
+    <div className="schedule-details">
       <h1>Schedule Details</h1>
       {loading ? (
         <p>Loading...</p>

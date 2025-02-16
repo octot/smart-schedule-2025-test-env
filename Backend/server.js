@@ -18,8 +18,8 @@ mongoose.connect(
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 30000, // Timeout after 30s
-    socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+    serverSelectionTimeoutMS: 30000,
+    socketTimeoutMS: 45000,
   }
 );
 
