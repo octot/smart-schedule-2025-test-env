@@ -4,8 +4,15 @@ import CreateScreen from "./components/CreateScreen";
 import ViewScreen from "./components/ViewScreen";
 import { SessionProvider } from "./components/contextAPI/sessionManagementContext";
 import ScheduleTable from "./components/scheduleDetails/scheduleDetails";
-import { Drawer, List, ListItem, ListItemText, CssBaseline, Box } from "@mui/material";
-
+import {
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  CssBaseline,
+  Box,
+} from "@mui/material";
+import SettingsScreen from "./components/SettingsScreen";
 const drawerWidth = 180;
 
 function App() {
@@ -18,9 +25,11 @@ function App() {
           <Drawer
             variant="permanent"
             sx={{
-            
               flexShrink: 0,
-              [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: "border-box" },
+              [`& .MuiDrawer-paper`]: {
+                width: drawerWidth,
+                boxSizing: "border-box",
+              },
             }}
           >
             <List>
@@ -30,16 +39,28 @@ function App() {
               <ListItem button component={Link} to="/create">
                 <ListItemText primary="Create" />
               </ListItem>
+              <ListItem button component={Link} to="/settings">
+                <ListItemText primary="Settings" />
+              </ListItem>
               <ListItem button component={Link} to="/viewScheduleDetails">
                 <ListItemText primary="View automated Schedule Details" />
               </ListItem>
             </List>
           </Drawer>
           {/* Main Content */}
-          <Box component="main" sx={{ flexGrow: 1, p: 1, ml: `${drawerWidth}px`, width: `calc(100% - ${drawerWidth}px)` }}>
+          <Box
+            component="main"
+            sx={{
+              flexGrow: 1,
+              p: 1,
+              ml: `${drawerWidth}px`,
+              width: `calc(100% - ${drawerWidth}px)`,
+            }}
+          >
             <Routes>
               <Route path="/" element={<ViewScreen />} />
               <Route path="/create/:id" element={<CreateScreen />} />
+              <Route path="/settings" element={<SettingsScreen />} />
               <Route path="/viewScheduleDetails" element={<ScheduleTable />} />
               <Route path="/create" element={<CreateScreen />} />
             </Routes>

@@ -16,12 +16,16 @@ import {
   DialogTitle,
   Button,
 } from "@mui/material";
+
+import LoadingScreen from "./assests/loadingDiagram/loading";
+
 const ViewScreen = () => {
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { setEditUser } = useSession();
   const [openDialogForWhatsapp, setOpenDialogForWhatsapp] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const handleOpenDialogForWhatsapp = () => setOpenDialogForWhatsapp(true);
   const handleCloseDialogForWhatsapp = () => setOpenDialogForWhatsapp(false);
   const navigate = useNavigate();
@@ -29,6 +33,7 @@ const ViewScreen = () => {
     sessionStartTime: "",
     sessionEndTime: "",
   });
+
   useEffect(() => {
     const fetchSchedules = async () => {
       try {
@@ -43,9 +48,11 @@ const ViewScreen = () => {
     };
     fetchSchedules();
   }, []);
+
   const handleEdit = (_id) => {
     navigate(`/create/${_id}`);
   };
+
   const handleDeleteSchedule = async (id) => {
     try {
       await axios.delete(`/api/schedules/${id}`);
@@ -55,6 +62,7 @@ const ViewScreen = () => {
       setError("Failed to delete schedule");
     }
   };
+
   const handleViaWhatsappDetails = (scheduleItem) => {
     console.log("scheduleItem", scheduleItem);
     const today = new Date()
@@ -66,11 +74,9 @@ const ViewScreen = () => {
     } else {
       setOpenDialogForWhatsapp(true);
       sendViaWhatsapp(scheduleItem, today);
-
-      // sendViaWhatsapp(updatedScheduleItem, today);
     }
   };
-  console.log("sessionTimes", sessionTimes);
+
   const sendViaWhatsapp = async (scheduleItem, today) => {
     const todaySchedule = scheduleItem?.totalDays.find(
       (item) => item.day === today
@@ -105,11 +111,25 @@ const ViewScreen = () => {
       [field]: value,
     }));
   };
+
+  const filteredSchedules = schedules.filter((schedule) => {
+    const tuitionId = String(schedule.tuitionId || "").toLowerCase();
+    return tuitionId.includes(searchQuery.toLowerCase());
+  }); 
   return (
     <div className="schedule-details">
       <h1>Schedule Details</h1>
+      <TextField
+        label="Search by Tutor Name"
+        variant="outlined"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        style={{ marginBottom: "20px" }}
+      />
       {loading ? (
-        <p>Loading...</p>
+        <p>
+          <LoadingScreen />
+        </p>
       ) : error ? (
         <p>{error}</p>
       ) : (
@@ -126,7 +146,7 @@ const ViewScreen = () => {
             </tr>
           </thead>
           <tbody>
-            {schedules.map((schedule) => (
+            {filteredSchedules.map((schedule) => (
               <tr key={schedule._id}>
                 <td>{schedule.tuitionId}</td>
                 <td>{schedule.tutorName}</td>
@@ -245,4 +265,5 @@ const ViewScreen = () => {
     </div>
   );
 };
+
 export default ViewScreen;

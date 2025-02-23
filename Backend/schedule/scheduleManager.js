@@ -7,61 +7,8 @@ const {
 } = require("../controllers/sessionsScheduleController");
 let globalTime;
 let globalSchedule = true;
-const schedules = [
-  {
-    useCommonSession: false,
-    _id: "6778c438a88a3ddeb126029c",
-    tuitionId: "659",
-    tutorName: "Tutor 311",
-    automate: true,
-    totalDays: [
-      {
-        day: "sun",
-        sessionStartTime: "10:00",
-        sessionEndTime: "11:00",
-        _id: "67821496db7bac6e98a80f01",
-      },
-      {
-        day: "mon",
-        sessionStartTime: "12:20",
-        sessionEndTime: "22:21",
-        _id: "67821496db7bac6e98a80f02",
-      },
-      {
-        day: "tue",
-        sessionStartTime: "14:00",
-        sessionEndTime: "15:30",
-        _id: "67821496db7bac6e98a80f03",
-      },
-      {
-        day: "wed",
-        sessionStartTime: "16:00",
-        sessionEndTime: "17:30",
-        _id: "67821496db7bac6e98a80f04",
-      },
-      {
-        day: "thu",
-        sessionStartTime: "18:00",
-        sessionEndTime: "19:00",
-        _id: "67821496db7bac6e98a80f05",
-      },
-      {
-        day: "fri",
-        sessionStartTime: "12:20",
-        sessionEndTime: "12:21",
-        _id: "67821496db7bac6e98a80f06",
-      },
-      {
-        day: "sat",
-        sessionStartTime: "08:00",
-        sessionEndTime: "09:30",
-        _id: "67821496db7bac6e98a80f07",
-      },
-    ],
-    sessionDate: "2025-01-04",
-    __v: 0,
-  },
-];
+let schedules = [];
+const { initializefetchSchedules } = require("../schedule/getAllSchedules.js");
 function calculateNextTriggerTime(day, time) {
   const daysOfWeek = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
   const dayIndex = daysOfWeek.indexOf(day.toLowerCase());
@@ -93,6 +40,7 @@ function scheduleMessages() {
   }
   schedules.forEach((scheduleItem) => {
     if (!scheduleItem.automate) return;
+    console.log("Schedule Manager schedules", scheduleItem);
     scheduleItem.totalDays.forEach((eachDay) => {
       const { day } = eachDay;
       const nextTriggerTime = calculateNextTriggerTime(day, globalTime);
@@ -120,7 +68,7 @@ function scheduleMessages() {
           Time of Session: ${eachDay.sessionStartTime} - ${eachDay.sessionEndTime} 
           
         `;
-          await axios.post(
+          await axios.post( 
             "http://localhost:5000/api/schedules/send-whatsapp",
             {
               message: scheduleMessage,
@@ -130,13 +78,17 @@ function scheduleMessages() {
           console.error(`Failed to send message for ${day}:`, error.message);
         }
       });
-      activeJobs.push(job);
+      if (!activeJobs.includes(job)) {
+        activeJobs.push(job);
+      }
     });
   });
 }
 function cancelJobs() {
-  activeJobs.forEach((job) => job.cancel());
-  activeJobs = [];
+  activeJobs.forEach((job) => {
+    if (job) job.cancel();
+  });
+  activeJobs.length = 0;
 }
 function updateScheduler() {
   if (globalSchedule) {
@@ -145,13 +97,19 @@ function updateScheduler() {
     cancelJobs();
   }
 }
-setTimeout(() => {
-  updateScheduler();
-}, 1000);
 initializeSettings()
   .then(({ configuredTime, configuredScheduleYN }) => {
     globalTime = configuredTime;
     globalSchedule = configuredScheduleYN;
+    updateScheduler();
+    console.log("Schedule Manager globalTime", globalTime);
+  })
+  .catch((error) => {
+    console.error("Failed to initialize settings:", error.message);
+  });
+initializefetchSchedules()
+  .then((data) => {
+    schedules = data.schedules; // Correct way to update the global variable
   })
   .catch((error) => {
     console.error("Failed to initialize settings:", error.message);

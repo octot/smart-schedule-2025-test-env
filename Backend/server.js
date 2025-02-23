@@ -2,7 +2,17 @@ const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
 const port = 5000;
+const http = require("http");
+const { Server } = require("socket.io");
 const cors = require("cors");
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*", // Allow frontend requests
+  },
+});
+
+
 const routes = require("./routes/sessionsScheduleRoutes");
 const { scheduleMessages } = require("./schedule/scheduleManager");
 app.use(express.json());
