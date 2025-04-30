@@ -60,7 +60,7 @@ const Settings = () => {
         label="Schedule Time"
         type="time"
         name="scheduleTimeSet"
-        value={settings.scheduleTimeSet}
+        value={settings?.scheduleTimeSet}
         onChange={handleChange}
         sx={{ width: "150px" }}
         margin="normal"
@@ -69,7 +69,7 @@ const Settings = () => {
         control={
           <Checkbox
             name="scheduleYN"
-            checked={settings.scheduleYN}
+            checked={settings?.scheduleYN}
             onChange={handleChange}
           />
         }

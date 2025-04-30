@@ -10,11 +10,11 @@ async function getSettingsData() {
     const settingsArray = response.data; // Assuming this is an array
     if (Array.isArray(settingsArray) && settingsArray.length > 0) {
       if (
-        settingsArray[0].scheduleTimeSet &&
-        settingsArray[0].scheduleYN !== undefined
+        settingsArray[0]?.scheduleTimeSet &&
+        settingsArray[0]?.scheduleYN !== undefined
       ) {
-        configuredTime = settingsArray[0].scheduleTimeSet;
-        configuredScheduleYN = settingsArray[0].scheduleYN;
+        configuredTime = settingsArray[0]?.scheduleTimeSet;
+        configuredScheduleYN = settingsArray[0]?.scheduleYN;
       }
     } else {
       console.error("No settings data found");

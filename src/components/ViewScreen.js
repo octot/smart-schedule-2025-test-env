@@ -37,7 +37,7 @@ const ViewScreen = () => {
   useEffect(() => {
     const fetchSchedules = async () => {
       try {
-        const response = await axios.get("/api/schedules");
+        const response = await axios.get("http://localhost:8080/schedules");
         setSchedules(response.data);
       } catch (err) {
         console.error(err);
@@ -50,12 +50,13 @@ const ViewScreen = () => {
   }, []);
 
   const handleEdit = (_id) => {
+    console.log('handlemyedit', _id)
     navigate(`/create/${_id}`);
   };
 
   const handleDeleteSchedule = async (id) => {
     try {
-      await axios.delete(`/api/schedules/${id}`);
+      await axios.delete(`http://localhost:8080/schedules/${id}`);
       setSchedules(schedules.filter((schedule) => schedule._id !== id));
     } catch (err) {
       console.error(err);
@@ -95,7 +96,7 @@ const ViewScreen = () => {
     Tutor Name : ${scheduleItem.tutorName}
     Time of Session: ${sessionStartTime} - ${sessionEndTime}`;
       try {
-        await axios.post("/api/schedules/send-whatsapp", { message });
+        await axios.post("http://localhost:8080/schedules/send-whatsapp", { message });
         setSessionTimes({ sessionStartTime: "", sessionEndTime: "" });
         alert("Message sent via WhatsApp");
       } catch (err) {
@@ -115,7 +116,7 @@ const ViewScreen = () => {
   const filteredSchedules = schedules.filter((schedule) => {
     const tuitionId = String(schedule.tuitionId || "").toLowerCase();
     return tuitionId.includes(searchQuery.toLowerCase());
-  }); 
+  });
   return (
     <div className="schedule-details">
       <h1>Schedule Details</h1>
@@ -139,6 +140,7 @@ const ViewScreen = () => {
               <th>Tuition ID</th>
               <th>Tutor Name</th>
               <th>Automate</th>
+              <th>schedule</th>
               <th>Session Date</th>
               <th>Total Days</th>
               <th>Actions</th>
@@ -152,6 +154,7 @@ const ViewScreen = () => {
                 <td>{schedule.tutorName}</td>
                 <td>{schedule.automate ? "Yes" : "No"}</td>
                 <td>{schedule.sessionDate}</td>
+                <td>ss</td>
                 <td>
                   <ul>
                     {schedule.totalDays.map((day, index) => (
@@ -163,8 +166,8 @@ const ViewScreen = () => {
                   </ul>
                 </td>
                 <td>
-                  <Button onClick={() => handleEdit(schedule._id)}>Edit</Button>
-                  <Button onClick={() => handleDeleteSchedule(schedule._id)}>
+                  <Button onClick={() => handleEdit(schedule.id)}>Edit</Button>
+                  <Button onClick={() => handleDeleteSchedule(schedule.id)}>
                     Delete
                   </Button>
                 </td>

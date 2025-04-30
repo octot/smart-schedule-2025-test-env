@@ -39,9 +39,10 @@ const CreateNewScreen = () => {
   const reduxDispatch = useDispatch();
   useEffect(() => {
     const fetchData = async () => {
-      if (id) {
+      if (id && id !== undefined) {
         try {
-          const response = await axios.get(`/api/schedules/${id}`);
+          console.log('id of fetchdata', id)
+          const response = await axios.get(`http://localhost:8080/schedules/${id}`);
           if (response.status !== 200) {
             console.error("Error fetching response:", response.statusText);
             return;
@@ -50,6 +51,9 @@ const CreateNewScreen = () => {
         } catch (error) {
           console.error("Error fetching data:", error.message);
         }
+      }
+      else {
+        console.error("Error in fetchData", id)
       }
     };
     fetchData();
@@ -60,7 +64,6 @@ const CreateNewScreen = () => {
         acc[item.day] = true;
         return acc;
       }, {});
-
       dispatch({ type: "SET_SELECTED_DAYS", payload: selectedDaysPayload });
     }
   }, [editUser, dispatch]);
@@ -79,7 +82,6 @@ const CreateNewScreen = () => {
       payload: { day, field, value },
     });
   };
-
   const handleSave = () => {
     if (editUser) {
       setEditUser((prev) => {
@@ -183,7 +185,7 @@ const CreateNewScreen = () => {
     try {
       if (editUser) {
         console.log("editUserhandleSubmit", editUser);
-        const response = await fetch(`/api/schedules/${editUser._id}`, {
+        const response = await fetch(`http://localhost:8080/schedules/${editUser.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -198,7 +200,7 @@ const CreateNewScreen = () => {
         dispatch({ type: "RESET_FORM" });
         navigate("/");
       } else {
-        const response = await fetch("/api/schedules", {
+        const response = await fetch("http://localhost:8080/schedules", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -229,10 +231,10 @@ const CreateNewScreen = () => {
         useCommonSession: checked,
         commonSession: checked
           ? {
-              ...prev.commonSession,
-              sessionStartTime: prev.commonSession?.sessionStartTime || "",
-              sessionEndTime: prev.commonSession?.sessionEndTime || "",
-            }
+            ...prev.commonSession,
+            sessionStartTime: prev.commonSession?.sessionStartTime || "",
+            sessionEndTime: prev.commonSession?.sessionEndTime || "",
+          }
           : null,
       }));
     }

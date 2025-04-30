@@ -8,18 +8,14 @@ const cors = require("cors");
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*", // Allow frontend requests
+    origin: "*",
   },
 });
-
-
 const routes = require("./routes/sessionsScheduleRoutes");
-const { scheduleMessages } = require("./schedule/scheduleManager");
+const { initializeScheduler } = require("./schedule/scheduleManager");
 app.use(express.json());
 app.use(routes);
 app.use(cors());
-scheduleMessages();
-
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
@@ -38,7 +34,7 @@ db.on("error", console.error.bind(console, "connection error:"));
 db.once("open", () => {
   console.log("Connected to MongoDB");
 });
-
+initializeScheduler();
 // Start server
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

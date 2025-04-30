@@ -30,6 +30,20 @@ function calculateNextTriggerTime(day, time) {
     return nextDate;
   }
 }
+async function refreshScheduler() {
+  try {
+    cancelJobs(); // stop current jobs
+
+    const data = await initializefetchSchedules();
+    schedules = data.schedules;
+
+    updateScheduler(); // re-run with fresh data
+    console.log("Scheduler refreshed.");
+  } catch (err) {
+    console.error("Error refreshing scheduler:", err.message);
+  }
+}
+
 function scheduleMessages() {
   if (!globalTime) {
     console.error("Global time is not defined. Cannot schedule messages.");
@@ -68,8 +82,8 @@ function scheduleMessages() {
           Time of Session: ${eachDay.sessionStartTime} - ${eachDay.sessionEndTime} 
           
         `;
-          await axios.post( 
-            "http://localhost:5000/api/schedules/send-whatsapp",
+          await axios.post(
+            "http://localhost:8080/schedules/send-whatsapp",
             {
               message: scheduleMessage,
             }
@@ -97,24 +111,23 @@ function updateScheduler() {
     cancelJobs();
   }
 }
-initializeSettings()
-  .then(({ configuredTime, configuredScheduleYN }) => {
-    globalTime = configuredTime;
-    globalSchedule = configuredScheduleYN;
-    updateScheduler();
-    console.log("Schedule Manager globalTime", globalTime);
-  })
-  .catch((error) => {
-    console.error("Failed to initialize settings:", error.message);
-  });
-initializefetchSchedules()
-  .then((data) => {
-    schedules = data.schedules; // Correct way to update the global variable
-  })
-  .catch((error) => {
-    console.error("Failed to initialize settings:", error.message);
-  });
+async function initializeScheduler() {
+  try {
+    const settings = await initializeSettings();
+    globalTime = settings.configuredTime;
+    globalSchedule = settings.configuredScheduleYN;
 
+    const data = await initializefetchSchedules();
+    schedules = data.schedules;
+
+    updateScheduler(); // Only now, when both are ready
+    console.log("Scheduler initialized with time:", globalTime);
+  } catch (error) {
+    console.error("Failed to initialize scheduler:", error.message);
+  }
+}
 module.exports = {
   scheduleMessages,
+  initializeScheduler,
+  refreshScheduler
 };
