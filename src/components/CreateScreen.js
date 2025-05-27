@@ -69,11 +69,6 @@ const CreateNewScreen = () => {
   }, [editUser, dispatch]);
 
   const toggleDaySelection = (day) => {
-    console.log(
-      "toggleDaySelectioneditUserstate",
-      state.selectedDays,
-      state.sessionTimes
-    );
     dispatch({ type: "TOGGLE_DAY", payload: day });
   };
   const handleSessionChange = (day, field, value) => {
@@ -151,6 +146,8 @@ const CreateNewScreen = () => {
                   (sessionData?.sessionEndTime ||
                     prevDayData?.sessionEndTime) ??
                   "",
+                  daySchedule:prevDayData?.daySchedule,
+                  automaticScheduleTime:prevDayData?.automaticScheduleTime
               };
             });
 
@@ -164,7 +161,6 @@ const CreateNewScreen = () => {
         }
       });
     }
-    console.log("editUserhandleSave", editUser);
     dispatch({ type: "SAVE_DAYS" });
   };
   const handleChange = (e) => {

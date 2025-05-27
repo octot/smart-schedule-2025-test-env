@@ -77,6 +77,8 @@ const sessionReducer = (state, action) => {
         sessionEndTime: state.useCommonSession
           ? state.commonSession.sessionEndTime
           : state.sessionTimes[d]?.sessionEndTime || "",
+          daySchedule:false,
+          automaticScheduleTime:"09:00"
       }));
       return {
         ...state,

@@ -33,6 +33,96 @@ const ViewScreen = () => {
     sessionStartTime: "",
     sessionEndTime: "",
   });
+  const [openDaySchedule, setDaySchedule] = useState(false);
+  const [selectedSchedule, setSelectedSchedule] = useState([]);
+  // totalDays
+
+  const handleDaySchedule = (schedule) => {
+    setSelectedSchedule(schedule);
+    setDaySchedule(true);
+  };
+  const handleScheduleDay = (selectedSchedule, selectedDay, time) => {
+    const updatedSchedule = {
+      ...selectedSchedule,
+      totalDays: selectedSchedule.totalDays.map(day =>
+        day.day === selectedDay.day
+          ? { ...day, automaticScheduleTime: time }
+          : day
+      )
+    };
+    setSelectedSchedule(updatedSchedule);
+  }
+  console.log("selectedSchedule", selectedSchedule)
+  const handleSelectedDayClose = () => {
+    setDaySchedule(false);
+    setSelectedSchedule(null);
+  };
+const transformDataForAutomaticSchedule = (selectedSchedule) => {
+  let transformedData = [];
+
+  if (selectedSchedule?.totalDays?.length > 0) {
+    let automaticScheduleDetails = selectedSchedule.totalDays.map(day => ({
+      day: day?.day,
+      sessionStartTime: day?.sessionStartTime,
+      sessionEndTime: day?.sessionEndTime,
+      daySchedule: true,
+      automaticScheduleTime: day?.automaticScheduleTime,
+      perDayScheduleUid:day?.perDayScheduleUid
+    }));
+
+    transformedData.push({
+      automaticScheduleDetails,
+      id: selectedSchedule?.id,
+      tuitionId: selectedSchedule?.tuitionId,
+      tutorName: selectedSchedule?.tutorName
+    });
+  }
+
+  console.log("transformDataForAutomaticSchedule transformedData", transformedData);
+  return transformedData;
+};
+
+
+  const handleSaveScheduleDetails = async (selectedSchedule) => {
+    console.log("handleSaveScheduleDetails", selectedSchedule);
+    const automaticBulkData = transformDataForAutomaticSchedule(selectedSchedule);
+    try {
+      const response = await fetch(`http://localhost:8080/schedules/${selectedSchedule?.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(selectedSchedule),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update schedule: ${response.statusText}`);
+      }
+      const data = await response.json();
+      console.log("Schedule updated successfully:", data);
+    } catch (error) {
+      console.error("Error updating schedule:", error);
+    }
+    try {
+      const responseOfBulk = await fetch(`http://localhost:8080/automatic-schedules/bulk-upload-schedules`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(automaticBulkData),
+      });
+
+      if (!responseOfBulk.ok) {
+        throw new Error(`Failed to update schedule: ${responseOfBulk.statusText}`);
+      }
+
+      const dataOfBulk = await responseOfBulk.json();
+      console.log("Schedule automatic  bulk updated successfully:", dataOfBulk);
+    } catch (error) {
+      console.error("Error automatic  bulk updating schedule:", error);
+    }
+  };
+
 
   useEffect(() => {
     const fetchSchedules = async () => {
@@ -53,7 +143,6 @@ const ViewScreen = () => {
     console.log('handlemyedit', _id)
     navigate(`/create/${_id}`);
   };
-
   const handleDeleteSchedule = async (id) => {
     try {
       await axios.delete(`http://localhost:8080/schedules/${id}`);
@@ -153,9 +242,10 @@ const ViewScreen = () => {
                 <td>{schedule.tuitionId}</td>
                 <td>{schedule.tutorName}</td>
                 <td>{schedule.automate ? "Yes" : "No"}</td>
+                <td><Button onClick={() => handleDaySchedule(schedule)}>schedule</Button></td>
                 <td>{schedule.sessionDate}</td>
-                <td>ss</td>
                 <td>
+
                   <ul>
                     {schedule.totalDays.map((day, index) => (
                       <li key={index}>
@@ -261,8 +351,55 @@ const ViewScreen = () => {
                   )}
                 </div>
               </tr>
+
             ))}
           </tbody>
+          <div>
+            {/* Modal */}
+            {openDaySchedule && selectedSchedule && (
+              <div className="modal">
+                <div className="modal-content">
+                  <h2>Schedule Details</h2>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Day</th>
+                        <th>Session Time</th>
+                        <th>scheduledTime</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedSchedule?.totalDays?.map((day, index) => (
+                        <tr key={index}>
+                          <td>{day?.day}</td>
+                          <td>
+                            {day?.sessionStartTime} to {day?.sessionEndTime}
+                          </td>
+                          <td>
+                            <TextField
+                              required
+                              type="time"
+                              label="scheduleDayTime"
+                              value={day.automaticScheduleTime}
+                              onChange={(e) => handleScheduleDay(selectedSchedule, day, e.target.value)}
+                              InputLabelProps={{
+                                shrink: true,
+                              }}
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                      <tr>
+                        <button onClick={() => handleSaveScheduleDetails(selectedSchedule)}>
+                          SaveScheduleDetails</button></tr>
+                    </tbody>
+                  </table>
+                  <button onClick={handleSelectedDayClose}>Close</button>
+                </div>
+
+              </div>
+            )}
+          </div>
         </table>
       )}
     </div>
