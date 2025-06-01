@@ -32,3 +32,182 @@ button {
 button:hover {
   background-color: #45a049;
 }
+/* Dialog Enhancement Styles */
+.enhanced-dialog-paper {
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+  overflow: visible !important;
+}
+
+.dialog-container {
+  position: relative;
+}
+
+.dialog-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background-color: #f5f5f5;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 1;
+  font-size: 18px;
+  color: #666;
+}
+
+.dialog-close-btn:hover {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.dialog-close-btn:focus {
+  outline: 2px solid #2196f3;
+  outline-offset: 2px;
+}
+
+.enhanced-dialog-title {
+  padding-right: 50px !important;
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  color: #1a1a1a !important;
+  border-bottom: 1px solid #e0e0e0 !important;
+  margin-bottom: 0 !important;
+}
+
+.enhanced-dialog-content {
+  padding: 24px !important;
+}
+
+.dialog-description {
+  margin-bottom: 20px !important;
+  color: #666 !important;
+  font-size: 0.95rem !important;
+  line-height: 1.5 !important;
+}
+
+.time-inputs-container {
+  display: flex;
+  gap: 16px;
+}
+
+.time-input-wrapper {
+  flex: 1;
+}
+
+.time-input-field {
+  background-color: #fafafa !important;
+}
+
+.enhanced-dialog-actions {
+  padding: 16px 24px 24px !important;
+  gap: 12px !important;
+  border-top: 1px solid #e0e0e0 !important;
+}
+
+.cancel-btn {
+  color: #666 !important;
+  border: 1px solid #ddd !important;
+  border-radius: 8px !important;
+  padding: 8px 20px !important;
+  text-transform: none !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+  background-color: transparent !important;
+}
+
+.cancel-btn:hover {
+  background-color: #f5f5f5 !important;
+  border-color: #bbb !important;
+}
+
+.send-btn {
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 8px 24px !important;
+  text-transform: none !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+  transition: all 0.2s ease !important;
+}
+
+.send-btn.enabled {
+  background-color: #2196f3 !important;
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3) !important;
+}
+
+.send-btn.enabled:hover {
+  background-color: #1976d2 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4) !important;
+}
+
+.send-btn.disabled {
+  background-color: #ccc !important;
+  color: white !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+}
+
+.send-btn:focus {
+  outline: 2px solid #2196f3;
+  outline-offset: 2px;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .time-inputs-container {
+    flex-direction: column;
+  }
+  
+  .enhanced-dialog-title {
+    font-size: 1.1rem !important;
+    padding-right: 40px !important;
+  }
+  
+  .dialog-close-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+    top: 10px;
+    right: 10px;
+  }
+  
+  .enhanced-dialog-content {
+    padding: 20px !important;
+  }
+  
+  .enhanced-dialog-actions {
+    padding: 12px 20px 20px !important;
+    flex-direction: column;
+  }
+  
+  .cancel-btn,
+  .send-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Animation for dialog entrance */
+.enhanced-dialog-paper {
+  animation: dialogSlideIn 0.3s ease-out;
+}
+
+@keyframes dialogSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

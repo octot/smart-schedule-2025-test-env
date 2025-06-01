@@ -1,0 +1,30 @@
+.sidebar {
+  flex-shrink: 0;
+  white-space: nowrap;
+  box-sizing: border-box;
+  transition: width 0.3s;
+  overflow-x: hidden;
+}
+
+.sidebar-open {
+  width: 139px;
+}
+
+.sidebar-closed {
+  width: 60px;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 8px;
+  transition: margin-left 0.3s, width 0.3s;
+}
+
+.main-open {
+  /* width: calc(100% - 20px); */
+}
+
+.main-closed {
+  margin-left: 36px;
+  width: calc(100% - 60px);
+}

@@ -16,7 +16,8 @@ import {
   DialogTitle,
   Button,
 } from "@mui/material";
-
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import LoadingScreen from "./assests/loadingDiagram/loading";
 
 const ViewScreen = () => {
@@ -57,30 +58,30 @@ const ViewScreen = () => {
     setDaySchedule(false);
     setSelectedSchedule(null);
   };
-const transformDataForAutomaticSchedule = (selectedSchedule) => {
-  let transformedData = [];
+  const transformDataForAutomaticSchedule = (selectedSchedule) => {
+    let transformedData = [];
 
-  if (selectedSchedule?.totalDays?.length > 0) {
-    let automaticScheduleDetails = selectedSchedule.totalDays.map(day => ({
-      day: day?.day,
-      sessionStartTime: day?.sessionStartTime,
-      sessionEndTime: day?.sessionEndTime,
-      daySchedule: true,
-      automaticScheduleTime: day?.automaticScheduleTime,
-      perDayScheduleUid:day?.perDayScheduleUid
-    }));
+    if (selectedSchedule?.totalDays?.length > 0) {
+      let automaticScheduleDetails = selectedSchedule.totalDays.map(day => ({
+        day: day?.day,
+        sessionStartTime: day?.sessionStartTime,
+        sessionEndTime: day?.sessionEndTime,
+        daySchedule: true,
+        automaticScheduleTime: day?.automaticScheduleTime,
+        perDayScheduleUid: day?.perDayScheduleUid
+      }));
 
-    transformedData.push({
-      automaticScheduleDetails,
-      id: selectedSchedule?.id,
-      tuitionId: selectedSchedule?.tuitionId,
-      tutorName: selectedSchedule?.tutorName
-    });
-  }
+      transformedData.push({
+        automaticScheduleDetails,
+        id: selectedSchedule?.id,
+        tuitionId: selectedSchedule?.tuitionId,
+        tutorName: selectedSchedule?.tutorName
+      });
+    }
 
-  console.log("transformDataForAutomaticSchedule transformedData", transformedData);
-  return transformedData;
-};
+    console.log("transformDataForAutomaticSchedule transformedData", transformedData);
+    return transformedData;
+  };
 
 
   const handleSaveScheduleDetails = async (selectedSchedule) => {
@@ -187,7 +188,6 @@ const transformDataForAutomaticSchedule = (selectedSchedule) => {
       try {
         await axios.post("http://localhost:8080/schedules/send-whatsapp", { message });
         setSessionTimes({ sessionStartTime: "", sessionEndTime: "" });
-        alert("Message sent via WhatsApp");
       } catch (err) {
         console.error(err);
         setError("Failed to send message via WhatsApp");
@@ -262,7 +262,12 @@ const transformDataForAutomaticSchedule = (selectedSchedule) => {
                   </Button>
                 </td>
                 <td>
-                  <Button onClick={() => handleViaWhatsappDetails(schedule)}>
+                  <Button
+                    onClick={() => {
+                      handleViaWhatsappDetails(schedule);
+                      toast.success("Sent via WhatsApp!");
+                    }}
+                  >
                     Send via WhatsApp
                   </Button>
                 </td>
@@ -276,76 +281,101 @@ const transformDataForAutomaticSchedule = (selectedSchedule) => {
                         aria-describedby="dialog-description"
                         maxWidth="sm"
                         fullWidth
-                        PaperProps={{ style: { height: "30vh" } }}
+                        PaperProps={{
+                          className: "enhanced-dialog-paper"
+                        }}
                       >
-                        <DialogTitle id="dialog-title">
-                          Date not found for today. Please provide the session
-                        </DialogTitle>
-                        <DialogContent>
-                          <DialogContentText
-                            id="dialog-description"
-                            style={{
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              height: "100%",
-                            }}
-                          >
-                            <div>
-                              <Box component="div" className="session-time">
-                                <label>
-                                  <TextField
-                                    required
-                                    label="Start Time"
-                                    type="time"
-                                    value={sessionTimes.sessionStartTime}
-                                    onChange={(e) =>
-                                      handleSessionForTodaysInterval(
-                                        "sessionStartTime",
-                                        e.target.value
-                                      )
-                                    }
-                                    InputLabelProps={{
-                                      shrink: true,
-                                    }}
-                                  />
-                                </label>
-                                <label>
-                                  <TextField
-                                    required
-                                    label="End Time"
-                                    type="time"
-                                    value={sessionTimes.sessionEndTime}
-                                    onChange={(e) =>
-                                      handleSessionForTodaysInterval(
-                                        "sessionEndTime",
-                                        e.target.value
-                                      )
-                                    }
-                                    InputLabelProps={{
-                                      shrink: true,
-                                    }}
-                                  />
-                                </label>
-                              </Box>
-                            </div>
-                          </DialogContentText>
-                        </DialogContent>
-                        <DialogActions>
-                          <Button
+                        <div className="dialog-container">
+                          {/* Enhanced Close Button */}
+                          <button
                             onClick={handleCloseDialogForWhatsapp}
-                            color="primary"
+                            className="dialog-close-btn"
+                            aria-label="Close dialog"
                           >
-                            Close
-                          </Button>
-                          <Button
-                            onClick={() => handleViaWhatsappDetails(schedule)}
-                            color="primary"
-                            autoFocus
+                            ×
+                          </button>
+
+                          <DialogTitle
+                            id="dialog-title"
+                            className="enhanced-dialog-title"
                           >
-                            SendMessage
-                          </Button>
-                        </DialogActions>
+                            Session Time Required
+                          </DialogTitle>
+
+                          <DialogContent className="enhanced-dialog-content">
+                            <DialogContentText
+                              id="dialog-description"
+                              className="dialog-description"
+                            >
+                              No session found for today. Please provide the start and end times for your session.
+                            </DialogContentText>
+
+                            <div className="time-inputs-container">
+                              <div className="time-input-wrapper">
+                                <TextField
+                                  required
+                                  label="Start Time"
+                                  type="time"
+                                  value={sessionTimes.sessionStartTime}
+                                  onChange={(e) =>
+                                    handleSessionForTodaysInterval(
+                                      "sessionStartTime",
+                                      e.target.value
+                                    )
+                                  }
+                                  InputLabelProps={{
+                                    shrink: true,
+                                  }}
+                                  fullWidth
+                                  variant="outlined"
+                                  className="time-input-field"
+                                />
+                              </div>
+
+                              <div className="time-input-wrapper">
+                                <TextField
+                                  required
+                                  label="End Time"
+                                  type="time"
+                                  value={sessionTimes.sessionEndTime}
+                                  onChange={(e) =>
+                                    handleSessionForTodaysInterval(
+                                      "sessionEndTime",
+                                      e.target.value
+                                    )
+                                  }
+                                  InputLabelProps={{
+                                    shrink: true,
+                                  }}
+                                  fullWidth
+                                  variant="outlined"
+                                  className="time-input-field"
+                                />
+                              </div>
+                            </div>
+                          </DialogContent>
+
+                          <DialogActions className="enhanced-dialog-actions">
+                            <Button
+                              onClick={handleCloseDialogForWhatsapp}
+                              className="cancel-btn"
+                            >
+                              Cancel
+                            </Button>
+
+                            <Button
+                              onClick={() => handleViaWhatsappDetails(schedule)}
+                              disabled={!sessionTimes.sessionStartTime || !sessionTimes.sessionEndTime}
+                              autoFocus
+                              className={`send-btn ${sessionTimes.sessionStartTime && sessionTimes.sessionEndTime
+                                  ? 'enabled'
+                                  : 'disabled'
+                                }`}
+                            >
+                              Send Message
+                            </Button>
+                          </DialogActions>
+                        </div>
                       </Dialog>
                     </div>
                   )}

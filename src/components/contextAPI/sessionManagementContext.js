@@ -25,7 +25,7 @@ const initialState = {
   },
   errors: {},
   useCommonSession: false,
-  open: false,
+  open: false
 };
 const sessionReducer = (state, action) => {
   switch (action.type) {
@@ -39,12 +39,13 @@ const sessionReducer = (state, action) => {
       } else {
         newSelectedDays[day] = true;
       }
-      
-      
+
+
       return {
         ...state,
         selectedDays: newSelectedDays,
         sessionTimes: newSessionTimes,
+
       };
 
     case "UPDATE_SESSION_TIME":
@@ -68,7 +69,7 @@ const sessionReducer = (state, action) => {
         errors: newErrors,
       };
     case "SAVE_DAYS":
-      
+
       const result = Object.keys(state.selectedDays).map((d) => ({
         day: d,
         sessionStartTime: state.useCommonSession
@@ -77,8 +78,8 @@ const sessionReducer = (state, action) => {
         sessionEndTime: state.useCommonSession
           ? state.commonSession.sessionEndTime
           : state.sessionTimes[d]?.sessionEndTime || "",
-          daySchedule:false,
-          automaticScheduleTime:"09:00"
+        daySchedule: false,
+        automaticScheduleTime: "09:00"
       }));
       return {
         ...state,
@@ -122,14 +123,16 @@ const sessionReducer = (state, action) => {
         selectedDays: action.payload.checked
           ? action.payload.selectedDaysTrue
           : {},
+
       };
 
     case "UPDATE_COMMON_SESSION":
       const updatedCommonSession = {
         ...state.commonSession,
         [action.payload.field]: action.payload.value,
+
       };
-      
+
       let commonSessionErrors = { ...state.errors };
       if (
         action.payload.field === "sessionEndTime" &&
@@ -171,7 +174,7 @@ export const SessionProvider = ({ children }) => {
     setEditUser((prevUsers) => {
       if (!Array.isArray(prevUsers)) return [updatedUser];
       const userExists = prevUsers.some((user) => user.id === updatedUser.id);
-      
+
       if (userExists) {
         return prevUsers.map((user) =>
           user.id === updatedUser.id ? { ...user, ...updatedUser } : user

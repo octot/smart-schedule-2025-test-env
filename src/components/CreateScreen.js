@@ -1,5 +1,5 @@
-import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import {
   useSession,
@@ -33,6 +33,7 @@ const CreateScreen = () => {
   );
 };
 const CreateNewScreen = () => {
+  const [isDirty, setIsDirty] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
   const { state, dispatch, setEditUser, editUser, updateUser } = useSession();
@@ -70,12 +71,14 @@ const CreateNewScreen = () => {
 
   const toggleDaySelection = (day) => {
     dispatch({ type: "TOGGLE_DAY", payload: day });
+    setIsDirty(true);
   };
   const handleSessionChange = (day, field, value) => {
     dispatch({
       type: "UPDATE_SESSION_TIME",
       payload: { day, field, value },
     });
+    setIsDirty(true);
   };
   const handleSave = () => {
     if (editUser) {
@@ -146,8 +149,8 @@ const CreateNewScreen = () => {
                   (sessionData?.sessionEndTime ||
                     prevDayData?.sessionEndTime) ??
                   "",
-                  daySchedule:prevDayData?.daySchedule,
-                  automaticScheduleTime:prevDayData?.automaticScheduleTime
+                daySchedule: prevDayData?.daySchedule,
+                automaticScheduleTime: prevDayData?.automaticScheduleTime
               };
             });
 
@@ -161,6 +164,7 @@ const CreateNewScreen = () => {
         }
       });
     }
+    setIsDirty(false);
     dispatch({ type: "SAVE_DAYS" });
   };
   const handleChange = (e) => {
@@ -234,6 +238,7 @@ const CreateNewScreen = () => {
           : null,
       }));
     }
+    setIsDirty(true);
     dispatch({
       type: "TOGGLE_COMMON_SESSION",
       payload: { checked, selectedDaysTrue },
@@ -250,13 +255,20 @@ const CreateNewScreen = () => {
         },
       }));
     }
+    setIsDirty(true);
     dispatch({
       type: "UPDATE_COMMON_SESSION",
       payload: { field, value: e.target.value },
     });
   };
   const handleOpen = () => dispatch({ type: "TOGGLE_MODAL", payload: true });
-  const handleClose = () => dispatch({ type: "TOGGLE_MODAL", payload: false });
+  const handleClose = () => {
+    if (isDirty) {
+      alert("You have unsaved changes. Please click Save before closing.");
+      return;
+    }
+    dispatch({ type: "TOGGLE_MODAL", payload: false });
+  }
   return (
     <div>
       <Box className="schedule-main">
@@ -270,7 +282,7 @@ const CreateNewScreen = () => {
           </Typography>
         )}
         <form onSubmit={handleSubmit}>
-          <Grid container spacing={2}>
+          <Grid container spacing={4} className='schedule-list'>
             {/* Tuition ID */}
             <Grid item xs={12} sm={6}>
               <TextField
@@ -308,7 +320,14 @@ const CreateNewScreen = () => {
             </Grid>
             {/* Automate Checkbox */}
             <Grid item xs={12} sm={6}>
-              <Button variant="outlined" onClick={handleOpen}>
+              <Button
+                variant="outlined"
+                onClick={handleOpen}
+                fullWidth
+                sx={{
+                  height: '56px',  // matches default TextField height
+                }}
+              >
                 Select Days
               </Button>
             </Grid>
@@ -324,6 +343,7 @@ const CreateNewScreen = () => {
                 label="Automate"
               />
             </Grid>
+
             {/* Submit Button */}
             <Grid item xs={12}>
               {editUser ? (
@@ -349,162 +369,155 @@ const CreateNewScreen = () => {
           </Grid>
           <ToastContainer />
           <Dialog open={state.open} onClose={handleClose}>
-            <DialogTitle>Select Days</DialogTitle>
-            <DialogContent>
-              <div className="days-grid-main">
-                <div className="days-grid-elements">
-                  {daysInWeek.map((day) => {
-                    const isSelected = state?.selectedDays?.[day] || false;
-                    return (
-                      <div
-                        key={day}
-                        onClick={() => toggleDaySelection(day)}
-                        style={{
-                          width: "50px",
-                          height: "50px",
-                          lineHeight: "50px",
-                          textAlign: "center",
-                          border: "1px solid black",
-                          backgroundColor: isSelected ? "green" : "transparent",
-                          color: isSelected ? "white" : "black",
-                          cursor: "pointer",
-                        }}
-                      >
-                        {day.toUpperCase()}
-                      </div>
-                    );
-                  })}
-                </div>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={
-                        editUser?.useCommonSession ||
-                        state.useCommonSession ||
-                        false
-                      }
-                      onChange={(e) => handleCheckboxChange(e.target.checked)}
-                    />
-                  }
-                  label="Use Common Session"
-                />
-                {editUser?.useCommonSession || state.useCommonSession ? (
-                  <div>
-                    <Box component="div" className="common-session">
-                      <label>
-                        <TextField
-                          fullWidth
-                          required
-                          type="time"
-                          label="CommonStartTime"
-                          value={
-                            editUser?.commonSession?.sessionStartTime ||
-                            state.commonSession.sessionStartTime ||
-                            ""
-                          }
-                          onChange={handleCommonSession("sessionStartTime")}
-                          InputLabelProps={{
-                            shrink: true,
-                          }}
-                        />
-                      </label>
-                      <label>
-                        <TextField
-                          fullWidth
-                          required
-                          label=" Common End Time"
-                          type="time"
-                          value={
-                            editUser?.commonSession?.sessionEndTime ||
-                            state.commonSession.sessionEndTime ||
-                            ""
-                          }
-                          onChange={handleCommonSession("sessionEndTime")}
-                          InputLabelProps={{
-                            shrink: true,
-                          }}
-                          error={
-                            !!editUser?.errors?.sessionEndTime ||
-                            !!state.errors.sessionEndTime
-                          }
-                          helperText={
-                            editUser?.errors?.sessionEndTime ||
-                            state.errors.sessionEndTime
-                          }
-                        />
-                      </label>
-                    </Box>
-                  </div>
-                ) : (
-                  <div>
+            <div className="days-dialog-main">
+              <DialogTitle>Select Days for Scheduled Classes</DialogTitle>
+              <DialogContent>
+                <div className="days-grid-main">
+                  <div className="days-grid-elements">
                     {daysInWeek.map((day) => {
-                      const userSession = editUser?.totalDays?.find(
-                        (item) => item.day === day
-                      );
-                      const sessionStartTime =
-                        userSession?.sessionStartTime ||
-                        state?.sessionTimes[day]?.sessionStartTime;
-                      const sessionEndTime =
-                        userSession?.sessionEndTime ||
-                        state?.sessionTimes[day]?.sessionEndTime;
+                      const isSelected = state?.selectedDays?.[day] || false;
                       return (
-                        state?.selectedDays?.[day] && (
-                          <div key={day}>
-                            <h4>{day.toUpperCase()} Session Times</h4>
-                            <Box component="div" className="session-time">
-                              <label>
-                                <TextField
-                                  required
-                                  label="Start Time"
-                                  type="time"
-                                  value={sessionStartTime}
-                                  onChange={(e) =>
-                                    handleSessionChange(
-                                      day,
-                                      "sessionStartTime",
-                                      e.target.value
-                                    )
-                                  }
-                                  InputLabelProps={{
-                                    shrink: true,
-                                  }}
-                                />
-                              </label>
-                              <label>
-                                <TextField
-                                  required
-                                  label="End Time"
-                                  type="time"
-                                  value={sessionEndTime}
-                                  onChange={(e) =>
-                                    handleSessionChange(
-                                      day,
-                                      "sessionEndTime",
-                                      e.target.value
-                                    )
-                                  }
-                                  InputLabelProps={{
-                                    shrink: true,
-                                  }}
-                                  error={!!state.errors[day]}
-                                  helperText={state.errors[day]}
-                                />
-                              </label>
-                            </Box>
-                          </div>
-                        )
+                        <div
+                          key={day}
+                          className={`day-box ${isSelected ? "selected" : ""}`}
+                          onClick={() => toggleDaySelection(day)}
+                        >
+                          {day}
+                        </div>
                       );
                     })}
                   </div>
-                )}
-                <Button onClick={handleSave}>Save</Button>
-              </div>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleClose} color="primary">
-                Close
-              </Button>
-            </DialogActions>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={
+                          editUser?.useCommonSession ||
+                          state.useCommonSession ||
+                          false
+                        }
+                        onChange={(e) => handleCheckboxChange(e.target.checked)}
+                      />
+                    }
+                    label="Use Common Session"
+                  />
+                  {editUser?.useCommonSession || state.useCommonSession ? (
+                    <div>
+                      <Box component="div" className="common-session">
+                        <label>
+                          <TextField
+                            fullWidth
+                            required
+                            type="time"
+                            label="CommonStartTime"
+                            value={
+                              editUser?.commonSession?.sessionStartTime ||
+                              state.commonSession.sessionStartTime ||
+                              ""
+                            }
+                            onChange={handleCommonSession("sessionStartTime")}
+                            InputLabelProps={{
+                              shrink: true,
+                            }}
+                          />
+                        </label>
+                        <label>
+                          <TextField
+                            fullWidth
+                            required
+                            label=" Common End Time"
+                            type="time"
+                            value={
+                              editUser?.commonSession?.sessionEndTime ||
+                              state.commonSession.sessionEndTime ||
+                              ""
+                            }
+                            onChange={handleCommonSession("sessionEndTime")}
+                            InputLabelProps={{
+                              shrink: true,
+                            }}
+                            error={
+                              !!editUser?.errors?.sessionEndTime ||
+                              !!state.errors.sessionEndTime
+                            }
+                            helperText={
+                              editUser?.errors?.sessionEndTime ||
+                              state.errors.sessionEndTime
+                            }
+                          />
+                        </label>
+                      </Box>
+                    </div>
+                  ) : (
+                    <div>
+                      {daysInWeek.map((day) => {
+                        const userSession = editUser?.totalDays?.find(
+                          (item) => item.day === day
+                        );
+                        const sessionStartTime =
+                          userSession?.sessionStartTime ||
+                          state?.sessionTimes[day]?.sessionStartTime;
+                        const sessionEndTime =
+                          userSession?.sessionEndTime ||
+                          state?.sessionTimes[day]?.sessionEndTime;
+                        return (
+                          state?.selectedDays?.[day] && (
+                            <div key={day}>
+                              <h4>{day.toUpperCase()} Session Times</h4>
+                              <Box component="div" className="session-time">
+                                <label>
+                                  <TextField
+                                    required
+                                    label="Start Time"
+                                    type="time"
+                                    value={sessionStartTime}
+                                    onChange={(e) =>
+                                      handleSessionChange(
+                                        day,
+                                        "sessionStartTime",
+                                        e.target.value
+                                      )
+                                    }
+                                    InputLabelProps={{
+                                      shrink: true,
+                                    }}
+                                  />
+                                </label>
+                                <label>
+                                  <TextField
+                                    required
+                                    label="End Time"
+                                    type="time"
+                                    value={sessionEndTime}
+                                    onChange={(e) =>
+                                      handleSessionChange(
+                                        day,
+                                        "sessionEndTime",
+                                        e.target.value
+                                      )
+                                    }
+                                    InputLabelProps={{
+                                      shrink: true,
+                                    }}
+                                    error={!!state.errors[day]}
+                                    helperText={state.errors[day]}
+                                  />
+                                </label>
+                              </Box>
+                            </div>
+                          )
+                        );
+                      })}
+                    </div>
+                  )}
+                  <Button onClick={handleSave}>Save</Button>
+                </div>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleClose} color="primary">
+                  Close
+                </Button>
+              </DialogActions>
+            </div>
           </Dialog>
         </form>
       </Box>
