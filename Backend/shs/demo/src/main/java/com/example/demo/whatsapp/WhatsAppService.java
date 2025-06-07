@@ -1,6 +1,5 @@
 package com.example.demo.whatsapp;
 
-import com.example.demo.EnvUtil;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
@@ -14,16 +13,15 @@ public class WhatsAppService {
     @Autowired
     public WhatsAppService(TwilioConfig config) {
         this.config = config;
-        Twilio.init(EnvUtil.get(config.getAccountSid()), EnvUtil.get(config.getAuthToken()));
+        Twilio.init(config.getAccountSid(), config.getAuthToken());
     }
 
     public String sendMessage(String body) {
         Message message = Message.creator(
-                new PhoneNumber(EnvUtil.get(config.getToNumber())),
-                new PhoneNumber(EnvUtil.get(config.getFromNumber())),
+                new PhoneNumber(config.getToNumber()),
+                new PhoneNumber(config.getFromNumber()),
                 body
         ).create();
-        System.out.println("Sent sendMessage with sid" + message.getSid());
         return message.getSid();
     }
 }

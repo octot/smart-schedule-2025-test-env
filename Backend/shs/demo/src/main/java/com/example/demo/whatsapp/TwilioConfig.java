@@ -1,14 +1,34 @@
 package com.example.demo.whatsapp;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
-@Data
-@ConfigurationProperties(prefix = "twilio")
+@Component
 public class TwilioConfig {
-    private String accountSid;
-    private String authToken;
-    private String fromNumber;
-    private String toNumber;
+    private final String accountSid;
+    private final String authToken;
+    private final String fromNumber;
+    private final String toNumber;
 
+    public TwilioConfig() {
+        this.accountSid = EnvUtil.get("TWILIO_ACCOUNT_SID");
+        this.authToken = EnvUtil.get("TWILIO_AUTH_TOKEN");
+        this.fromNumber = EnvUtil.get("TWILIO_FROM_NUMBER");
+        this.toNumber = EnvUtil.get("TWILIO_TO_NUMBER");
+    }
+
+    public String getAccountSid() {
+        return accountSid;
+    }
+
+    public String getAuthToken() {
+        return authToken;
+    }
+
+    public String getFromNumber() {
+        return fromNumber;
+    }
+
+    public String getToNumber() {
+        return toNumber;
+    }
 }
