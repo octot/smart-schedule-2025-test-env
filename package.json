@@ -9,14 +9,15 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  "proxy": "http://localhost:5000",
+  "proxy": "http://localhost:8080",
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@emotion/react": "^11.13.5",
-    "@emotion/styled": "^11.13.5",
-    "@mui/material": "^6.1.10",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^7.1.0",
+    "@mui/material": "^7.1.0",
     "@reduxjs/toolkit": "^2.4.0",
     "axios": "^1.7.9",
     "cors": "^2.8.5",
@@ -41,6 +42,7 @@
   },
   "devDependencies": {
     "dotenv-cli": "^8.0.0",
+    "fork-ts-checker-webpack-plugin": "^9.1.0",
     "react-scripts": "^5.0.1"
   },
   "browserslist": {
