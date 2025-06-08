@@ -176,6 +176,8 @@ const ViewScreen = () => {
       await axios.delete(`${URL}/schedules/${id}`);
       setSchedules(schedules.filter((schedule) => schedule._id !== id));
       toast.success("Schedule deleted successfully!");
+      const response = await axios.get(`${URL}/schedules`);
+      setSchedules(response.data);
     } catch (err) {
       console.error(err);
       setError("Failed to delete schedule");
@@ -184,7 +186,7 @@ const ViewScreen = () => {
   };
 
   const handleViaWhatsappDetails = (scheduleItem) => {
-    console.log("scheduleItem", scheduleItem);
+    console.log("scheduleItemhandleViaWhatsappDetails", scheduleItem);
     const today = new Date()
       .toLocaleString("en-US", { weekday: "short" })
       .toLowerCase();
@@ -318,57 +320,58 @@ Time of Session: ${formattedStartTime} - ${formattedEndTime}`;
             </Card>
           ) : (
             filteredSchedules.map((schedule, index) => (
-              <Fade in={true} timeout={300 + index * 100} key={schedule._id}>
-                <Card className="schedule-card glass-effect hover-lift">
-                  <CardContent>
-                    {/* Card Header */}
-                    <div className="card-header">
-                      <div className="tuition-info">
-                        <Typography variant="h6" className="tuition-id">
-                          <SchoolIcon className="info-icon" />
-                          ID: {schedule.tuitionId}
+              <div>
+                <Fade in={true} timeout={300 + index * 100} key={schedule._id}>
+                  <Card className="schedule-card glass-effect hover-lift">
+                    <CardContent>
+                      {/* Card Header */}
+                      <div className="card-header">
+                        <div className="tuition-info">
+                          <Typography variant="h6" className="tuition-id">
+                            <SchoolIcon className="info-icon" />
+                            ID: {schedule.tuitionId}
+                          </Typography>
+                          <Chip
+                            label={schedule.automate ? "Automated" : "Manual"}
+                            className={`status-chip ${schedule.automate ? 'automated' : 'manual'}`}
+                            size="small"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Tutor Information */}
+                      <div className="tutor-section">
+                        <Typography variant="h6" className="tutor-name">
+                          <PersonIcon className="info-icon" />
+                          {schedule.tutorName}
                         </Typography>
-                        <Chip
-                          label={schedule.automate ? "Automated" : "Manual"}
-                          className={`status-chip ${schedule.automate ? 'automated' : 'manual'}`}
-                          size="small"
-                        />
+                        <Typography variant="body2" className="session-date">
+                          <CalendarIcon className="info-icon" />
+                          Session Date: {schedule.sessionDate}
+                        </Typography>
                       </div>
-                    </div>
 
-                    {/* Tutor Information */}
-                    <div className="tutor-section">
-                      <Typography variant="h6" className="tutor-name">
-                        <PersonIcon className="info-icon" />
-                        {schedule.tutorName}
-                      </Typography>
-                      <Typography variant="body2" className="session-date">
-                        <CalendarIcon className="info-icon" />
-                        Session Date: {schedule.sessionDate}
-                      </Typography>
-                    </div>
-
-                    {/* Schedule Days */}
-                    <div className="days-section">
-                      <Typography variant="subtitle2" className="section-title">
-                        <TimeIcon className="info-icon" />
-                        Weekly Schedule
-                      </Typography>
-                      <div className="days-list">
-                        {schedule.totalDays.map((day, dayIndex) => (
-                          <div key={dayIndex} className="day-item">
-                            <span className="day-name">{day.day}</span>
-                            <span className="day-time">
-                              {day.sessionStartTime} - {day.sessionEndTime}
-                            </span>
-                          </div>
-                        ))}
+                      {/* Schedule Days */}
+                      <div className="days-section">
+                        <Typography variant="subtitle2" className="section-title">
+                          <TimeIcon className="info-icon" />
+                          Weekly Schedule
+                        </Typography>
+                        <div className="days-list">
+                          {schedule.totalDays.map((day, dayIndex) => (
+                            <div key={dayIndex} className="day-item">
+                              <span className="day-name">{day.day}</span>
+                              <span className="day-time">
+                                {day.sessionStartTime} - {day.sessionEndTime}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Action Buttons */}
-                    <div className="action-buttons">
-                      {/*
+                      {/* Action Buttons */}
+                      <div className="action-buttons">
+                        {/*
                       <Button
                         variant="outlined"
                         startIcon={<ScheduleIcon />}
@@ -379,133 +382,135 @@ Time of Session: ${formattedStartTime} - ${formattedEndTime}`;
                         Schedule
                       </Button>
                       */
-                      }
+                        }
 
+                        <Button
+                          variant="outlined"
+                          startIcon={<EditIcon />}
+                          onClick={() => handleEdit(schedule.id)}
+                          className="action-btn edit-btn"
+                          size="small"
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          startIcon={<DeleteIcon />}
+                          onClick={() => handleDeleteSchedule(schedule.id)}
+                          className="action-btn delete-btn"
+                          size="small"
+                        >
+                          Delete
+                        </Button>
+                        <Button
+                          variant="contained"
+                          startIcon={<WhatsAppIcon />}
+                          onClick={() => {
+                            handleViaWhatsappDetails(schedule);
+                          }}
+                          className="action-btn whatsapp-btn"
+                          size="small"
+                        >
+                          WhatsApp
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Fade>
+                {/* Enhanced WhatsApp Dialog */}
+                <Dialog
+                  open={openDialogForWhatsapp}
+                  onClose={handleCloseDialogForWhatsapp}
+                  maxWidth="sm"
+                  fullWidth
+                  className="enhanced-dialog"
+                  TransitionComponent={Slide}
+                  TransitionProps={{ direction: "up" }}
+                >
+                  <div className="modern-dialog-container">
+                    <IconButton
+                      onClick={handleCloseDialogForWhatsapp}
+                      className="dialog-close-btn"
+                      aria-label="Close dialog"
+                    >
+                      <CloseIcon />
+                    </IconButton>
+
+                    <DialogTitle className="modern-dialog-title">
+                      {/* <TimeIcon className="dialog-icon" /> */}
+                      Session Time Required
+                    </DialogTitle>
+
+                    <DialogContent className="modern-dialog-content">
+                      <DialogContentText className="dialog-description">
+                        No session found for today. Please provide the start and end times for your session.
+                      </DialogContentText>
+
+                      <div className="time-inputs-grid">
+                        <TextField
+                          required
+                          label="Start Time"
+                          type="time"
+                          value={sessionTimes.sessionStartTime}
+                          onChange={(e) =>
+                            handleSessionForTodaysInterval(
+                              "sessionStartTime",
+                              e.target.value
+                            )
+                          }
+                          InputLabelProps={{ shrink: true }}
+                          fullWidth
+                          variant="outlined"
+                          className="time-input-field"
+                        />
+
+                        <TextField
+                          required
+                          label="End Time"
+                          type="time"
+                          value={sessionTimes.sessionEndTime}
+                          onChange={(e) =>
+                            handleSessionForTodaysInterval(
+                              "sessionEndTime",
+                              e.target.value
+                            )
+                          }
+                          InputLabelProps={{ shrink: true }}
+                          fullWidth
+                          variant="outlined"
+                          className="time-input-field"
+                        />
+                      </div>
+                    </DialogContent>
+
+                    <DialogActions className="modern-dialog-actions">
                       <Button
-                        variant="outlined"
-                        startIcon={<EditIcon />}
-                        onClick={() => handleEdit(schedule.id)}
-                        className="action-btn edit-btn"
-                        size="small"
+                        onClick={handleCloseDialogForWhatsapp}
+                        className="dialog-cancel-btn"
                       >
-                        Edit
+                        Cancel
                       </Button>
                       <Button
-                        variant="outlined"
-                        startIcon={<DeleteIcon />}
-                        onClick={() => handleDeleteSchedule(schedule.id)}
-                        className="action-btn delete-btn"
-                        size="small"
-                      >
-                        Delete
-                      </Button>
-                      <Button
-                        variant="contained"
-                        startIcon={<WhatsAppIcon />}
                         onClick={() => {
                           handleViaWhatsappDetails(schedule);
+                          handleCloseDialogForWhatsapp();
                         }}
-                        className="action-btn whatsapp-btn"
-                        size="small"
+                        disabled={!sessionTimes.sessionStartTime || !sessionTimes.sessionEndTime}
+                        className="dialog-send-btn"
+                        variant="contained"
                       >
-                        WhatsApp
+                        Send Message
                       </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Fade>
+                    </DialogActions>
+                  </div>
+                </Dialog>
+              </div>
             ))
           )}
         </div>
       )}
 
-      {/* Enhanced WhatsApp Dialog */}
-      <Dialog
-        open={openDialogForWhatsapp}
-        onClose={handleCloseDialogForWhatsapp}
-        maxWidth="sm"
-        fullWidth
-        className="enhanced-dialog"
-        TransitionComponent={Slide}
-        TransitionProps={{ direction: "up" }}
-      >
-        <div className="modern-dialog-container">
-          <IconButton
-            onClick={handleCloseDialogForWhatsapp}
-            className="dialog-close-btn"
-            aria-label="Close dialog"
-          >
-            <CloseIcon />
-          </IconButton>
 
-          <DialogTitle className="modern-dialog-title">
-            {/* <TimeIcon className="dialog-icon" /> */}
-            Session Time Required
-          </DialogTitle>
-
-          <DialogContent className="modern-dialog-content">
-            <DialogContentText className="dialog-description">
-              No session found for today. Please provide the start and end times for your session.
-            </DialogContentText>
-
-            <div className="time-inputs-grid">
-              <TextField
-                required
-                label="Start Time"
-                type="time"
-                value={sessionTimes.sessionStartTime}
-                onChange={(e) =>
-                  handleSessionForTodaysInterval(
-                    "sessionStartTime",
-                    e.target.value
-                  )
-                }
-                InputLabelProps={{ shrink: true }}
-                fullWidth
-                variant="outlined"
-                className="time-input-field"
-              />
-
-              <TextField
-                required
-                label="End Time"
-                type="time"
-                value={sessionTimes.sessionEndTime}
-                onChange={(e) =>
-                  handleSessionForTodaysInterval(
-                    "sessionEndTime",
-                    e.target.value
-                  )
-                }
-                InputLabelProps={{ shrink: true }}
-                fullWidth
-                variant="outlined"
-                className="time-input-field"
-              />
-            </div>
-          </DialogContent>
-
-          <DialogActions className="modern-dialog-actions">
-            <Button
-              onClick={handleCloseDialogForWhatsapp}
-              className="dialog-cancel-btn"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                handleViaWhatsappDetails(schedules[0]); // Using first schedule as reference
-                handleCloseDialogForWhatsapp();
-              }}
-              disabled={!sessionTimes.sessionStartTime || !sessionTimes.sessionEndTime}
-              className="dialog-send-btn"
-              variant="contained"
-            >
-              Send Message
-            </Button>
-          </DialogActions>
-        </div>
-      </Dialog>
 
       {/* Enhanced Schedule Modal */}
       <Dialog
