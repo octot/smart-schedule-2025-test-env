@@ -1,11 +1,13 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import SaveIcon from '@mui/icons-material/Save';
 import { useDispatch } from "react-redux";
 import {
   useSession,
   SessionProvider,
 } from "./contextAPI/sessionManagementContext";
 import { addSession } from "./store/scheduleSlice";
+import { AutoAwesome, SmartToy } from '@mui/icons-material';
 import {
   Dialog,
   DialogTitle,
@@ -23,8 +25,10 @@ import "../componentcss/CreateScreen.css";
 import { sessionTimes, selectedDaysTrue, daysInWeek } from "./constants";
 import { useEffect } from "react";
 import axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { URL } from '../components/ConstantVariables'
+import CloseButton from '../components/assests/icons/CloseButton'
 const CreateScreen = () => {
   return (
     <SessionProvider>
@@ -43,7 +47,7 @@ const CreateNewScreen = () => {
       if (id && id !== undefined) {
         try {
           console.log('id of fetchdata', id)
-          const response = await axios.get(`http://localhost:8080/schedules/${id}`);
+          const response = await axios.get(`${URL}/schedules/${id}`);
           if (response.status !== 200) {
             console.error("Error fetching response:", response.statusText);
             return;
@@ -185,7 +189,7 @@ const CreateNewScreen = () => {
     try {
       if (editUser) {
         console.log("editUserhandleSubmit", editUser);
-        const response = await fetch(`http://localhost:8080/schedules/${editUser.id}`, {
+        const response = await fetch(`${URL}/schedules/${editUser.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -200,7 +204,7 @@ const CreateNewScreen = () => {
         dispatch({ type: "RESET_FORM" });
         navigate("/");
       } else {
-        const response = await fetch("http://localhost:8080/schedules", {
+        const response = await fetch(`${URL}/schedules`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -332,16 +336,31 @@ const CreateNewScreen = () => {
               </Button>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name="automate"
-                    checked={editUser?.automate || state.formData.automate}
-                    onChange={handleChange}
-                  />
-                }
-                label="Automate"
-              />
+              <Box className="automate-checkbox-container">
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name="automate"
+                      checked={editUser?.automate || state.formData.automate}
+                      onChange={handleChange}
+                      className="automate-checkbox"
+                      icon={<div className="checkbox-icon unchecked" />}
+                      checkedIcon={<div className="checkbox-icon checked"><AutoAwesome /></div>}
+                    />
+                  }
+                  label={
+                    <Box className="checkbox-label-container">
+                      <Typography className="checkbox-label-text">
+                        Automate
+                      </Typography>
+                      <Typography className="checkbox-label-subtitle">
+                        Enable smart automation
+                      </Typography>
+                    </Box>
+                  }
+                  className="automate-form-control"
+                />
+              </Box>
             </Grid>
 
             {/* Submit Button */}
@@ -367,7 +386,6 @@ const CreateNewScreen = () => {
               )}
             </Grid>
           </Grid>
-          <ToastContainer />
           <Dialog open={state.open} onClose={handleClose}>
             <div className="days-dialog-main">
               <DialogTitle>Select Days for Scheduled Classes</DialogTitle>
@@ -388,6 +406,7 @@ const CreateNewScreen = () => {
                     })}
                   </div>
                   <FormControlLabel
+                    className="use-common-session-checkbox"
                     control={
                       <Checkbox
                         checked={
@@ -398,7 +417,7 @@ const CreateNewScreen = () => {
                         onChange={(e) => handleCheckboxChange(e.target.checked)}
                       />
                     }
-                    label="Use Common Session"
+                    label="Same Time for All Days"
                   />
                   {editUser?.useCommonSession || state.useCommonSession ? (
                     <div>
@@ -448,7 +467,7 @@ const CreateNewScreen = () => {
                       </Box>
                     </div>
                   ) : (
-                    <div>
+                    <div className="session-times-container">
                       {daysInWeek.map((day) => {
                         const userSession = editUser?.totalDays?.find(
                           (item) => item.day === day
@@ -461,61 +480,72 @@ const CreateNewScreen = () => {
                           state?.sessionTimes[day]?.sessionEndTime;
                         return (
                           state?.selectedDays?.[day] && (
-                            <div key={day}>
-                              <h4>{day.toUpperCase()} Session Times</h4>
-                              <Box component="div" className="session-time">
-                                <label>
-                                  <TextField
-                                    required
-                                    label="Start Time"
-                                    type="time"
-                                    value={sessionStartTime}
-                                    onChange={(e) =>
-                                      handleSessionChange(
-                                        day,
-                                        "sessionStartTime",
-                                        e.target.value
-                                      )
-                                    }
-                                    InputLabelProps={{
-                                      shrink: true,
-                                    }}
-                                  />
-                                </label>
-                                <label>
-                                  <TextField
-                                    required
-                                    label="End Time"
-                                    type="time"
-                                    value={sessionEndTime}
-                                    onChange={(e) =>
-                                      handleSessionChange(
-                                        day,
-                                        "sessionEndTime",
-                                        e.target.value
-                                      )
-                                    }
-                                    InputLabelProps={{
-                                      shrink: true,
-                                    }}
-                                    error={!!state.errors[day]}
-                                    helperText={state.errors[day]}
-                                  />
-                                </label>
-                              </Box>
+                            <div key={day} className="session-card">
+                              <h4 className="session-title">{day.toUpperCase()} Session Times</h4>
+                              <div className="session-time-wrapper">
+                                <div className="time-input-group">
+                                  <label className="time-label">
+                                    <TextField
+                                      required
+                                      label="Start Time"
+                                      type="time"
+                                      value={sessionStartTime}
+                                      onChange={(e) =>
+                                        handleSessionChange(
+                                          day,
+                                          "sessionStartTime",
+                                          e.target.value
+                                        )
+                                      }
+                                      InputLabelProps={{
+                                        shrink: true,
+                                      }}
+                                      className="time-input"
+                                    />
+                                  </label>
+                                </div>
+                                <div className="time-input-group">
+                                  <label className="time-label">
+                                    <TextField
+                                      required
+                                      label="End Time"
+                                      type="time"
+                                      value={sessionEndTime}
+                                      onChange={(e) =>
+                                        handleSessionChange(
+                                          day,
+                                          "sessionEndTime",
+                                          e.target.value
+                                        )
+                                      }
+                                      InputLabelProps={{
+                                        shrink: true,
+                                      }}
+                                      error={!!state.errors[day]}
+                                      helperText={state.errors[day]}
+                                      className="time-input"
+                                    />
+                                  </label>
+                                </div>
+                              </div>
                             </div>
                           )
                         );
                       })}
                     </div>
                   )}
-                  <Button onClick={handleSave}>Save</Button>
+                  <Button
+                    onClick={handleSave}
+                    className="save-schedule-btn"
+                    variant="contained"
+                    startIcon={<SaveIcon />}
+                  >
+                    Save Schedule
+                  </Button>
                 </div>
               </DialogContent>
               <DialogActions>
-                <Button onClick={handleClose} color="primary">
-                  Close
-                </Button>
+              <CloseButton onClose={handleClose} text="Cancel" />
               </DialogActions>
             </div>
           </Dialog>
