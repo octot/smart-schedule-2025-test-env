@@ -196,24 +196,42 @@ const ViewScreen = () => {
       sendViaWhatsapp(scheduleItem, today);
     }
   };
+  function convertTo12HourFormat(time24) {
+    const [rawHour, rawMinute] = time24.split(':');
+    const hour = Number(rawHour);
+    const minute = Number(rawMinute);
 
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+
+    const paddedHour = hour12.toString().padStart(2, '0');
+    const paddedMinute = minute.toString().padStart(2, '0');
+
+    return `${paddedHour}:${paddedMinute} ${ampm}`;
+  }
   const sendViaWhatsapp = async (scheduleItem, today) => {
     const todaySchedule = scheduleItem?.totalDays.find(
       (item) => item.day === today
     );
     let sessionStartTime = todaySchedule?.sessionStartTime;
     let sessionEndTime = todaySchedule?.sessionEndTime;
+
     if (sessionTimes.sessionStartTime && sessionTimes.sessionEndTime) {
       sessionStartTime = sessionTimes.sessionStartTime;
       sessionEndTime = sessionTimes.sessionEndTime;
     }
+
     if (sessionStartTime && sessionEndTime) {
-      const message = `Greetings from Smartpoint 😇
-    Today your class is scheduled for
-    Tuition ID : ${scheduleItem.tuitionId}
-    Session Date : ${scheduleItem.sessionDate}
-    Tutor Name : ${scheduleItem.tutorName}
-    Time of Session: ${sessionStartTime} - ${sessionEndTime}`;
+      const formattedStartTime = convertTo12HourFormat(sessionStartTime);
+      const formattedEndTime = convertTo12HourFormat(sessionEndTime);
+      const message =
+        `Greetings from Smartpoint 😇
+Today your class is scheduled for
+Tuition ID : ${scheduleItem.tuitionId}
+Session Date : ${scheduleItem.sessionDate}
+Tutor Name : ${scheduleItem.tutorName}
+Time of Session: ${formattedStartTime} - ${formattedEndTime}`;
+
       try {
         await axios.post(`${URL}/schedules/send-whatsapp`, { message });
         setSessionTimes({ sessionStartTime: "", sessionEndTime: "" });
