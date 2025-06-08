@@ -714,7 +714,7 @@ button:hover {
 .dialog-close-btn {
   position: absolute;
   top: 12px;
-  right: 11px;
+  right: -11px;
   z-index: 10;
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(10px);

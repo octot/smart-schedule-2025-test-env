@@ -46,7 +46,7 @@ const CreateNewScreen = () => {
     const fetchData = async () => {
       if (id && id !== undefined) {
         try {
-          console.log('id of fetchdata', id)
+
           const response = await axios.get(`${URL}/schedules/${id}`);
           if (response.status !== 200) {
             console.error("Error fetching response:", response.statusText);
@@ -85,14 +85,13 @@ const CreateNewScreen = () => {
     setIsDirty(true);
   };
   const handleSave = () => {
+    console.log("workinghandleavse")
+    toast.success("Schedule saved   successfully!", {
+      position: "top-right",
+      autoClose: 1000,
+    });
     if (editUser) {
       setEditUser((prev) => {
-        console.log(
-          "handleSaveeditUserstate",
-          state.selectedDays,
-          state.sessionTimes
-        );
-        console.log("prev.useCommonSession", prev.useCommonSession);
         if (prev.useCommonSession) {
           return {
             ...prev,
@@ -135,8 +134,6 @@ const CreateNewScreen = () => {
             ],
           };
         } else {
-          console.log("prev.totalDays", prev.totalDays);
-          console.log("updatedTotalDaysstateselectedDays", state.selectedDays);
           const updatedTotalDays = Object.keys(state.selectedDays)
             .filter((day) => state.selectedDays[day])
             .map((day) => {
@@ -157,15 +154,12 @@ const CreateNewScreen = () => {
                 automaticScheduleTime: prevDayData?.automaticScheduleTime
               };
             });
-
-          console.log(updatedTotalDays);
-
-          console.log("updatedTotalDays", updatedTotalDays);
           return {
             ...prev,
             totalDays: updatedTotalDays,
           };
         }
+
       });
     }
     setIsDirty(false);
@@ -188,7 +182,7 @@ const CreateNewScreen = () => {
     e.preventDefault();
     try {
       if (editUser) {
-        console.log("editUserhandleSubmit", editUser);
+
         const response = await fetch(`${URL}/schedules/${editUser.id}`, {
           method: "PUT",
           headers: {
@@ -545,7 +539,7 @@ const CreateNewScreen = () => {
                 </div>
               </DialogContent>
               <DialogActions>
-              <CloseButton onClose={handleClose} text="Cancel" />
+                <CloseButton onClose={handleClose} text="Cancel" />
               </DialogActions>
             </div>
           </Dialog>
